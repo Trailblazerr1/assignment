@@ -1,2 +1,2 @@
 # assignment
-Task on three.js
+Task in javascript
