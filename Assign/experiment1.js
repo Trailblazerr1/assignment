@@ -44,6 +44,8 @@ var myBallZ;            /* Z Position for placing ball */
 var gravityX;           /* X component of Gravity in m/S2 */
 var gravityY;           /* Y component of Gravity in m/S2 */
 
+var meshh;
+
 /******************* Interaction functions ***********************/
 
 /**
@@ -96,6 +98,7 @@ var Ystep;          /* Y Position Slider Step */
 var VXstep;         /* X Velocity Slider Step */
 var VYstep;         /* Y Velocity Slider Step */
 var AYstep;         /* Y Acceleration Slider Step */
+var radius;
 
 /*
  * This function handles the X position slider change
@@ -163,7 +166,6 @@ function handleVY(newValue)
  */
 function handleAY(newValue)
 {
-     // console.log(newValue);
     myBallAY = newValue;
 }
 
@@ -181,13 +183,13 @@ function initialiseControlVariables()
     Ydefault=myCenterY;        /* Y Position Slider Default Value */
     VXdefault=0.1;             /* X Velocity Slider Default Value */
     VYdefault=0.1;             /* Y Velocity Slider Default Value */
-    AYdefault=-9.8;            /* Y Acceleration Slider Default Value */
+    AYdefault=-2;            /* Y Acceleration Slider Default Value */
 
     /* Slider Limits */
     Xmin=leftB+myBallRadius;   /* X Position Slider Minimum Value */
     Xmax=rightB-myBallRadius;  /* X Position Slider Maximum Value */
-    Ymin=bottomB+myBallRadius; /* Y Position Slider Minimum Value */
-    Ymax=topB-myBallRadius;    /* Y Position Slider Maximum Value */
+    Ymin=2.7; /* Y Position Slider Minimum Value */
+    Ymax=2.2;    /* Y Position Slider Maximum Value */
     VXmin=-1.0;                /* X Velocity Slider Minimum Value */
     VXmax= 1.0;                /* X Velocity Slider Maximum Value */
     VYmin=-1.0;                /* Y Velocity Slider Minimum Value */
@@ -201,6 +203,7 @@ function initialiseControlVariables()
     VXstep=0.1;                 /* X Velocity Slider Step */
     VYstep=0.1;                 /* Y Velocity Slider Step */
     AYstep=-0.1;               /* Y Acceleration Slider Step */
+    radius=0.09;
 }
 
 
@@ -302,6 +305,7 @@ function initialiseScene()
     myCenterX  = (mySceneTLX + mySceneBRX) / 2.0;
     myCenterY  = (mySceneTLY + mySceneBRY) / 2.0;
     myBallZ    = -2.0;
+    radius     = 0.09;
 }
 
 function initialiseOtherVariables()
@@ -312,13 +316,14 @@ function initialiseOtherVariables()
 
     /* Gravity */
     gravityX = 0.0;
-    gravityY = -9.8;
+    gravityY = -0.02;
 
     /* Barriers */
     leftB=mySceneTLX;
     rightB=mySceneBRX;
-    bottomB=mySceneBRY;
+    bottomB=0.53;
     topB=mySceneTLY;
+    topBb=1.0;
 }
 
 /**
@@ -364,8 +369,8 @@ var material;
 var loader;
 var texture;
 
-    PIEsetExperimentTitle("TimeX");
-    PIEsetDeveloperName("Bruce Wayne");
+    PIEsetExperimentTitle("Experiment Name");
+    PIEsetDeveloperName("Wayne");
     PIEhideControlElement();
 
     /* initialise help and info content */
@@ -377,16 +382,77 @@ var texture;
 
     /* initialise Other Variables */
     initialiseOtherVariables();
+//Add bottle
 
-    /* Create Ball and add it to scene */
-    myBall = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshLambertMaterial({color:0x00ff00}));
-    myBall.position.set(myBallX, myBallY, myBallZ);
-    myBall.castShadow = true;
-    myBall.receiveShadow = true;
+    material = new THREE.LineBasicMaterial({    color: 0xffffff,
+        linewidth: 1,
+        linecap: 'round', //ignored by WebGLRenderer
+        linejoin:  'round' //ignored by WebGLRenderer
+    });
+    geometry = new THREE.Geometry();
+    geometry.vertices.push(
+        new THREE.Vector3( 5, 3, -8.2),
+        new THREE.Vector3( 5, 1, -8.2),
+        new THREE.Vector3( 8, 1, -8.2 ),
+        new THREE.Vector3( 8, 1.5, -8.2),
+        new THREE.Vector3( 8.3, 1.5, -8.2),
+        new THREE.Vector3( 8.3, 1.7, -8.2),
+        new THREE.Vector3( 8, 1.7, -8.2),
+        new THREE.Vector3( 8, 3, -8.2 )
+    );
+    myFloor = new THREE.Line(geometry, material);
+    myFloor.scale.set( 0.3, 0.3, 0.3 );
+    PIEaddElement(myFloor);
+
+//Add level
+
+
+                x = y = 0;
+                var fishShape = new THREE.Shape();
+                fishShape.moveTo(x,y);
+                fishShape.quadraticCurveTo(x + 5, y+1 , x + 11, y);
+//                fishShape.quadraticCurveTo(x + 100, y - 10, x + 115, y - 40);
+//                fishShape.quadraticCurveTo(x + 115, y, x + 115, y + 40);
+//                fishShape.quadraticCurveTo(x + 100, y + 10, x + 90, y + 10);
+//                fishShape.quadraticCurveTo(x + 8, y + 5, x, y);
+    geometry = new THREE.ShapeGeometry( fishShape );
+    material = new THREE.MeshBasicMaterial( { color: 0xffffff, overdraw: 0.5 } );
+    myBall = new THREE.Mesh( geometry, material );
+    myBall.position.set(1.4, 1.0 , 0.0 );
+        myBall.scale.set( 0.05, 0.05, 0.05 );
+        myBall.receiveShadow = true;
     PIEaddElement(myBall);
+
+    //Add sphere
+    
+     geometry = new THREE.SphereGeometry( radius, 32, 32 );
+     console.log(radius);
+     material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+     var myLeft = new THREE.Mesh( geometry, material );
+     myLeft.position.set( 2.39, 0.82, 0.2);
+     myLeft.position.needsUpdate = true;
+    myLeft.geometry.dynamic = true;
+     PIEaddElement(myLeft);
+
     /* Allow Dragging of the ball */
-    PIEdragElement(myBall);
-    PIEsetDrag(myBall, myBallDrag);
+        //    PIEdragElement(myBall);
+        //    PIEsetDrag(myBall, myBallDrag);
+
+var material = new THREE.PointCloudMaterial({
+  color: 0xffffcc
+});
+var geometry = new THREE.Geometry();
+var x, y, z;
+_.times(1000, function(n){
+  x = (Math.random() * 800) - 400;
+  y = (Math.random() * 800) - 400;
+  z = (Math.random() * 800) - 400;
+
+  geometry.vertices.push(new THREE.Vector3(x, y, z));
+});
+var myRight = new THREE.PointCloud(geometry, material);
+PIEaddElement(myRight);
+
 
     /* Initialise Wall variables */
     /* All walls extend beynd the room size in both directions */
@@ -398,34 +464,35 @@ var texture;
     // texture.anisotropy = 16;
     // material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: texture } );
     // geometry = new THREE.PlaneBufferGeometry( mySceneW * 2, backB * 2 );
-    geometry = new THREE.BoxGeometry( mySceneW * 2, wallThickness, 100);
-    material = new THREE.MeshLambertMaterial( {color: 0xaaaaaa} );
-    myFloor  = new THREE.Mesh( geometry, material );
-    // myFloor.lookAt(new THREE.Vector3(0,1,0));
-    myFloor.position.set(myCenterX, bottomB - (wallThickness / 2), 0.0);
-    myFloor.receiveShadow = true;
-    PIEaddElement(myFloor);
+    // geometry = new THREE.BoxGeometry( mySceneW * 2, wallThickness, 100);
+    // material = new THREE.MeshLambertMaterial( {color: 0xaaaaaa} );
+    // myFloor  = new THREE.Mesh( geometry, material );
+    // // myFloor.lookAt(new THREE.Vector3(0,1,0));
+    // myFloor.position.set(myCenterX, bottomB - (wallThickness / 2), 0.0);
+    // myFloor.receiveShadow = true;
+    // PIEaddElement(myFloor);
+
     /* Ceiling */
-    geometry = new THREE.BoxGeometry( mySceneW * 2, wallThickness, 100 );
-    material = new THREE.MeshLambertMaterial( {color: 0xffffff} );
-    myCeiling = new THREE.Mesh( geometry, material );
-    myCeiling.position.set(myCenterX, topB+(wallThickness/2), 0.0);
-    myFloor.receiveShadow = true;
-    PIEaddElement(myCeiling);
+        // geometry = new THREE.BoxGeometry( mySceneW * 2, wallThickness, 100 );
+        // material = new THREE.MeshLambertMaterial( {color: 0xffffff} );
+        // myCeiling = new THREE.Mesh( geometry, material );
+        // myCeiling.position.set(myCenterX, topB+(wallThickness/2), 0.0);
+        // myFloor.receiveShadow = true;
+        // PIEaddElement(myCeiling);
     /* Left */
-    geometry = new THREE.BoxGeometry( wallThickness, mySceneH * 2, 100 );
-    material = new THREE.MeshLambertMaterial( {color: 0xaa0000} );
-    myLeft = new THREE.Mesh( geometry, material );
-    myLeft.position.set(leftB-(wallThickness/2), myCenterY, 0.0);
-    myLeft.receiveShadow = true;
-    PIEaddElement(myLeft);
+        // geometry = new THREE.BoxGeometry( wallThickness, mySceneH * 2, 100 );
+        // material = new THREE.MeshLambertMaterial( {color: 0xaa0000} );
+        // myLeft = new THREE.Mesh( geometry, material );
+        // myLeft.position.set(leftB-(wallThickness/2), myCenterY, 0.0);
+        // myLeft.receiveShadow = true;
+        // PIEaddElement(myLeft);
     /* Right */
-    geometry = new THREE.BoxGeometry( wallThickness, mySceneH * 2, 100 );
-    material = new THREE.MeshLambertMaterial( {color: 0xaa0000} );
-    myRight = new THREE.Mesh( geometry, material );
-    myRight.position.set(rightB+(wallThickness/2), myCenterY, 0.0);
-    myRight.receiveShadow = true;
-    PIEaddElement(myRight);
+        // geometry = new THREE.BoxGeometry( wallThickness, mySceneH * 2, 100 );
+        // material = new THREE.MeshLambertMaterial( {color: 0xaa0000} );
+        // myRight = new THREE.Mesh( geometry, material );
+        // myRight.position.set(rightB+(wallThickness/2), myCenterY, 0.0);
+        // myRight.receiveShadow = true;
+        // PIEaddElement(myRight);
     /* Back */
     // material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: texture } );
     // geometry = new THREE.PlaneBufferGeometry( mySceneW * 2, mySceneH * 2 );
@@ -472,17 +539,20 @@ function resetExperiment()
     myBallAY     = gravityY;
 
     /* Reset Ball position */
-    myBall.position.set(myBallX, myBallY, myBallZ);
-
+//meshh.position.set(6,1,-8.2);
     /* Reset Wall position */
     /* Floor */
-    myFloor.position.set(myCenterX, bottomB - (wallThickness / 2), 0.0);
+
+    myBall.position.set(1.7, 1.1 , 0.0);
+//    console.log(myCenterX, bottomB - (wallThickness / 2), 0.0);
     /* Ceiling */
-    myCeiling.position.set(myCenterX, topB+(wallThickness/2), 0.0);
+    //sph.position.set(1.7, 1.1,0.0);
+
+//    myCeiling.position.set(myCenterX, topB+(wallThickness/2), 0.0);
     /* Left */
-    myLeft.position.set(leftB-(wallThickness/2), myCenterY, 0.0);
+ //   myLeft.position.set(1.5, 1.1, 0.0 );
     /* Right */
-    myRight.position.set(rightB+(wallThickness/2), myCenterY, 0.0);
+ //   myRight.position.set(rightB+(wallThickness/2), myCenterY, 0.0);
     /* Back */
     myBack.position.set(myCenterX, myCenterY, backB - (wallThickness / 2));
 }
@@ -525,44 +595,63 @@ var tempT;          /* Temporary time */
     myBallX = myBall.position.x;
     myBallY = myBall.position.y;
     myBallZ = myBall.position.z;
-
+//    console.log(myBallX,myBallY,myBallZ);
     /* Intialise for boundary detection */
     changeX   = 1;
     changeY   = 1;
     boundaryT = dt / 1000.0;    /* convert to seconds */
-
+//    console.log(boundaryT,dt);
     /* Compute new myBall position and check for boundary event */
-    newX = myBallX + myBallVX * boundaryT + 0.5 * myBallAX * boundaryT * boundaryT;
+    newX = myBallX + myBallVX * boundaryT ; //s=s0+ut
+//    console.log(newX);
     if ((newX >= (rightB - myBallRadius)) || (newX <= (leftB + myBallRadius)))
     {   /* X boundary violated */
-	if (newX >= (rightB - myBallRadius))
-        {   /* Ball hits right */
-            if (myBallAX == 0) { tempT = ((rightB - myBallRadius) - myBallX) / myBallVX; }
-            else { tempT = (Math.sqrt(myBallVX * myBallVX + 2 * myBallAX * ((rightB - myBallRadius) - myBallX)) - myBallVX) / myBallAX; }
-        }
-	if (newX <= (leftB + myBallRadius))
-        {   /* Ball hits left */
-            if (myBallAX == 0) { tempT = ((leftB + myBallRadius) - myBallX) / myBallVX; }
-            else { tempT = ((-myBallVX) - Math.sqrt(myBallVX * myBallVX + 2 * myBallAX * ((leftB + myBallRadius) - myBallX))) / myBallAX; }
-        }
-	if (tempT == boundaryT) { changeX = -1; }
-	if (tempT < boundaryT)  { changeX = -1; changeY = 1; boundaryT = tempT }
+        if (newX >= (rightB - myBallRadius))
+            {   /* Ball hits right */
+                if (myBallAX == 0) {
+                    tempT = ((rightB - myBallRadius) - myBallX) / myBallVX;
+                }
+                else {
+                    tempT = (Math.sqrt(myBallVX * myBallVX + 2 * myBallAX * ((rightB - myBallRadius) - myBallX)) - myBallVX) / myBallAX;
+                }
+            }
+        if (newX <= (leftB + myBallRadius))
+            {   /* Ball hits left */
+                if (myBallAX == 0) { tempT = ((leftB + myBallRadius) - myBallX) / myBallVX; }
+                else { tempT = ((-myBallVX) - Math.sqrt(myBallVX * myBallVX + 2 * myBallAX * ((leftB + myBallRadius) - myBallX))) / myBallAX; }
+            }
+        if (tempT == boundaryT) { changeX = -1; }
+        if (tempT < boundaryT)  { changeX = -1; changeY = 1; boundaryT = tempT }
     }
-    newY = myBallY + myBallVY * boundaryT + 0.5 * myBallAY * boundaryT * boundaryT;
-    if ((newY >= (topB - myBallRadius)) || (newY <= (bottomB + myBallRadius)))
+
+
+    newY = myBallY + myBallVY * boundaryT ;
+//    console.log(newY);
+    if ((newY >= myCenterY) || (newY <= (myCenterY / 2)))
     {   /* Y boundary violated */
-	if (newY >= (topB - myBallRadius))
-        {   /* Ball hits top */
-            if (myBallAY == 0) { tempT = ((topB - myBallRadius) - myBallY) / myBallVY; }
-            else { tempT = (Math.sqrt(myBallVY * myBallVY + 2 * myBallAY * ((topB - myBallRadius) - myBallY)) - myBallVY) / myBallAY; }
-        }
-	if (newY <= (bottomB + myBallRadius))
-        {   /* Ball hits bottom */
-            if (myBallAY == 0) { tempT = ((bottomB + myBallRadius) - myBallY) / myBallVY; }
-            else { tempT = ((-myBallVY) - Math.sqrt(myBallVY * myBallVY + 2 * myBallAY * ((bottomB + myBallRadius) - myBallY))) / myBallAY; }
-        }
-	if (tempT == boundaryT) { changeY = -1; }
-	if (tempT < boundaryT)  { changeY = -1; changeX = 1; boundaryT = tempT }
+        if (newY >= (myCenterY))
+            {   /* Ball hits top */
+                if (myBallAY == 0) {
+                 tempT = ((topBb - myBallRadius) - myBallY) / myBallVY;
+            }
+                else {
+                    tempT = (Math.sqrt(myBallVY * myBallVY + 2 * myBallAY * ((topBb - myBallRadius) - myBallY)) - myBallVY) / myBallAY; }
+            }
+        if (newY <= (myCenterY / 2))
+            {   /* Ball hits bottom */
+                if (myBallAY == 0) {
+                    tempT = ((bottomB + myBallRadius) - myBallY) / myBallVY;
+                }
+                else {
+                    tempT = ((-myBallVY) - Math.sqrt(myBallVY * myBallVY + 2 * myBallAY * ((bottomB + myBallRadius) - myBallY))) / myBallAY;
+                }
+            }
+        if (tempT == boundaryT) {
+   //         console.log('Bingo');
+            changeY = -1;}
+        if (tempT < boundaryT)  {
+   //         console.log(tempT,boundaryT);
+         changeY = -1; changeX = 1; boundaryT = tempT }
     }
     /* Finally Change in direction boundary Event for velocity */
     if ((changeX == 1) && (changeY == 1))
@@ -570,14 +659,14 @@ var tempT;          /* Temporary time */
         newVX = (myBallVX + myBallAX * boundaryT);
         if ((newVX * myBallVX) < 0)
         {   /* X velocity changed direction */
-	    tempT = (-myBallVX) / myBallAX;
-	    if (tempT < boundaryT)  { boundaryT = tempT }
+        tempT = (-myBallVX) / myBallAX;
+        if (tempT < boundaryT)  { boundaryT = tempT }
         }
         newVY = (myBallVY + myBallAY * boundaryT);
         if ((newVY * myBallVY) < 0)
         {   /* Y velocity changed direction */
-	    tempT = (-myBallVY) / myBallAY;
-	    if (tempT < boundaryT)  { boundaryT = tempT }
+        tempT = (-myBallVY) / myBallAY;
+        if (tempT < boundaryT)  { boundaryT = tempT }
         }
     }
 
@@ -588,9 +677,19 @@ var tempT;          /* Temporary time */
     myBallVY = (myBallVY + myBallAY * boundaryT) * changeY;
     myBallAX = myBallAX;
     myBallAY = myBallAY;
+    radius +=0.0001;
 
-    /* Set Ball position */
+
+     geometry = new THREE.SphereGeometry( radius, 32, 32 );
+     console.log(radius);
+     material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+     var myLeft = new THREE.Mesh( geometry, material );
+     myLeft.position.set( 2.39, 0.82, 0.2);
+     myLeft.position.needsUpdate = true;
+    myLeft.geometry.dynamic = true;
+     PIEaddElement(myLeft);    /* Set Ball position */
     myBall.position.set(myBallX, myBallY, myBallZ);
+
 
     /* Adjust Simulation time in case boundary event has occured */
     boundaryT *= 1000;
