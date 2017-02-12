@@ -23,14 +23,17 @@ var backB=-4.0;         /* Back Barrier */
 var wallThickness;      /* Wall Thickness */
 
 /* Room Objects */
-var myFloor;            /* Floor */
+var myJug;            /* Floor */
 var myCeiling;          /* Ceiling */
 var myBack;             /* Back */
-var myRight;            /* Right */
-var myLeft;             /* Left */
-
+var myFlow;            /* Right */
+var myballoon;             /* Left */
+var myFlowOther;
+var myNewLevel;
+var tap;
 /* Ball variables */
-var myBall;             /* Ball Object */
+
+var mylevel;             /* Ball Object */
 var myBallRadius;       /* Radius */
 var myBallX;            /* X Position */
 var myBallY;            /* Y Position */
@@ -99,7 +102,10 @@ var VXstep;         /* X Velocity Slider Step */
 var VYstep;         /* Y Velocity Slider Step */
 var AYstep;         /* Y Acceleration Slider Step */
 var radius;
-
+var rectWidth;
+var count;
+var scaleSphereX;
+var scaleSphereY;
 /*
  * This function handles the X position slider change
  * <p>
@@ -204,6 +210,10 @@ function initialiseControlVariables()
     VYstep=0.1;                 /* Y Velocity Slider Step */
     AYstep=-0.1;               /* Y Acceleration Slider Step */
     radius=0.09;
+    rectWidth = 0.046;
+    count=3;
+    scaleSphereX=0.3;
+    scaleSphereY=0.3;
 }
 
 
@@ -306,6 +316,10 @@ function initialiseScene()
     myCenterY  = (mySceneTLY + mySceneBRY) / 2.0;
     myBallZ    = -2.0;
     radius     = 0.09;
+    rectWidth  = 0.046;
+    count      = 3;
+    scaleSphereX=0.3;
+    scaleSphereY=0.3;
 }
 
 function initialiseOtherVariables()
@@ -382,9 +396,10 @@ var texture;
 
     /* initialise Other Variables */
     initialiseOtherVariables();
-//Add bottle
 
-    material = new THREE.LineBasicMaterial({    color: 0xffffff,
+//Add jug
+
+    material = new THREE.LineBasicMaterial({    color: 0x000000,
         linewidth: 1,
         linecap: 'round', //ignored by WebGLRenderer
         linejoin:  'round' //ignored by WebGLRenderer
@@ -400,104 +415,113 @@ var texture;
         new THREE.Vector3( 8, 1.7, -8.2),
         new THREE.Vector3( 8, 3, -8.2 )
     );
-    myFloor = new THREE.Line(geometry, material);
-    myFloor.scale.set( 0.3, 0.3, 0.3 );
-    PIEaddElement(myFloor);
+    myJug = new THREE.Line(geometry, material);
+    myJug.scale.set( 0.3, 0.3, 0.3 );
+    PIEaddElement(myJug);
 
 //Add level
 
 
-                x = y = 0;
-                var fishShape = new THREE.Shape();
-                fishShape.moveTo(x,y);
-                fishShape.quadraticCurveTo(x + 5, y+1 , x + 11, y);
-//                fishShape.quadraticCurveTo(x + 100, y - 10, x + 115, y - 40);
-//                fishShape.quadraticCurveTo(x + 115, y, x + 115, y + 40);
-//                fishShape.quadraticCurveTo(x + 100, y + 10, x + 90, y + 10);
-//                fishShape.quadraticCurveTo(x + 8, y + 5, x, y);
+    x = y = 0.0;
+    var fishShape = new THREE.Shape();
+    fishShape.moveTo(x,y);
+    fishShape.quadraticCurveTo(x + 5, y+1 , x + 11, y);
     geometry = new THREE.ShapeGeometry( fishShape );
     material = new THREE.MeshBasicMaterial( { color: 0xffffff, overdraw: 0.5 } );
-    myBall = new THREE.Mesh( geometry, material );
-    myBall.position.set(1.4, 1.0 , 0.0 );
-        myBall.scale.set( 0.05, 0.05, 0.05 );
-        myBall.receiveShadow = true;
-    PIEaddElement(myBall);
+    mylevel = new THREE.Mesh( geometry, material );
+    mylevel.position.set(1.4, 1.0 , 0.0 );
+    mylevel.scale.set( 0.05, 0.05, 0.05 );
+    mylevel.receiveShadow = true;
+//    PIEaddElement(mylevel);
 
-    //Add sphere
+//Add sphere
     
-     geometry = new THREE.SphereGeometry( radius, 32, 32 );
-     console.log(radius);
-     material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-     var myLeft = new THREE.Mesh( geometry, material );
-     myLeft.position.set( 2.39, 0.82, 0.2);
-     myLeft.position.needsUpdate = true;
-    myLeft.geometry.dynamic = true;
-     PIEaddElement(myLeft);
+        // geometry = new THREE.SphereGeometry( radius, 32, 32 );
+        // material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+        // myballoon = new THREE.Mesh( geometry, material );
+        // myballoon.position.set( 2.39, 0.82, 0.2);
+        // myballoon.position.needsUpdate = true;
+        // myballoon.geometry.dynamic = true;
+        // myballoon.scale.set( 0.8, 0.8, 0.8 );
+        // PIEaddElement(myballoon);
+    x = y = 0;
+    var fishShape = new THREE.Shape();
+    fishShape.moveTo(0.75,0.25);
+    fishShape.quadraticCurveTo(x + 0.4, y+0.25 , x + 0.25, y+0.625);
+    fishShape.quadraticCurveTo(x + 0.35, y+1 , x + 0.6, 1);
+    fishShape.quadraticCurveTo(x + 0.6, y+1 ,x+0.65 , y+1 );
+    fishShape.quadraticCurveTo(x + 1.25, y+1 ,x+1.25 , y+0.625 );
+    fishShape.quadraticCurveTo(x + 1.25, y+0.25 , x+0.75 , y+0.25);
+    geometry = new THREE.ShapeGeometry( fishShape );
+    geometry.dynamic = true;
+    geometry.__dirtyPosition = true;
+    material = new THREE.MeshBasicMaterial( { color: 0xd7608d, overdraw: 0.5 } );
+    myballoon = new THREE.Mesh( geometry, material );
+    myballoon.position.set( 2.20, 0.615, 0.2);
+    // myballoon.position.needsUpdate = true;
+    // myballoon.geometry.dynamic = true;
+    myballoon.scale.set( scaleSphereX, scaleSphereY, scaleSphereX );
+    PIEaddElement(myballoon);
 
     /* Allow Dragging of the ball */
         //    PIEdragElement(myBall);
         //    PIEsetDrag(myBall, myBallDrag);
 
-var material = new THREE.PointCloudMaterial({
-  color: 0xffffcc
-});
-var geometry = new THREE.Geometry();
-var x, y, z;
-_.times(1000, function(n){
-  x = (Math.random() * 800) - 400;
-  y = (Math.random() * 800) - 400;
-  z = (Math.random() * 800) - 400;
 
-  geometry.vertices.push(new THREE.Vector3(x, y, z));
-});
-var myRight = new THREE.PointCloud(geometry, material);
-PIEaddElement(myRight);
+//Water flow1
+    SUBDIVISIONS = 100;
+    geometry = new THREE.Geometry();
+    curve = new THREE.QuadraticBezierCurve3();
+    curve.v0 = new THREE.Vector3(0.55, 0.0, 0);
+    curve.v1 = new THREE.Vector3(0.55, 1.1, 0);
+    curve.v2 = new THREE.Vector3(0.55, 1.3, 0);
+    for (j = 0; j < SUBDIVISIONS; j++) {
+       geometry.vertices.push( curve.getPoint(j / SUBDIVISIONS) )
+    }
+
+    material = new THREE.LineBasicMaterial( { color:0x03A9F4, linewidth: 405 } );
+    myFlow = new THREE.Line(geometry, material);
+    myFlow.position.set( 1.39, 0.82, 0.0);
+    myFlow.scale.set( 1, 1, 1 );
+    PIEaddElement(myFlow);
 
 
-    /* Initialise Wall variables */
-    /* All walls extend beynd the room size in both directions */
-    /* Floor */
-    // loader = new THREE.TextureLoader();
-    // texture = loader.load( '../PIE/images/hardwood2_diffuse.jpg' );
-    // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    // texture.repeat.set( 25, 25 );
-    // texture.anisotropy = 16;
+// new level
+        var rectLength = 0.207;
+        var rectShape = new THREE.Shape();
+        rectShape.moveTo( 0,0 );
+        rectShape.lineTo( 0, rectWidth );
+        rectShape.lineTo( rectLength, rectWidth );
+        rectShape.lineTo( rectLength, 0 );
+        rectShape.lineTo( 0, 0 );
+        geometry = new THREE.ShapeGeometry( rectShape );
+        geometry.dynamic = true;
+        geometry.__dirtyPosition = true;
+        material = new THREE.MeshBasicMaterial( { color: 0x03A9F4, overdraw: 0.5 } );
+        myFlowOther = new THREE.Mesh( geometry, material );
+        myFlowOther.position.set( 1.655, 0.665 , 0.0 );
+        myFlowOther.scale.set( 3, count, 3 );
+        PIEaddElement(myFlowOther);
+        console.log(myFlowOther.position.y);
+
+//tap
+torusKnotGeo = new THREE.TorusKnotGeometry(50, 10, 128, 16);
+phongMat2 = new THREE.MeshPhongMaterial( { color: 0x03A9F4} );
+tap = new THREE.Mesh(torusKnotGeo, phongMat2);
+    PIEaddElement(tap);
+    tap.position.set( 1.655, 0.665 , 0.0 );
+    tap.scale.set( 0.3, 30, 30 );
+//back
+    //  loader = new THREE.TextureLoader();
+    // texture = loader.load( 'images/brick_bump.jpg' );
+    //  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    //  texture.repeat.set( 25, 25 );
+    //  texture.anisotropy = 16;
     // material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: texture } );
     // geometry = new THREE.PlaneBufferGeometry( mySceneW * 2, backB * 2 );
-    // geometry = new THREE.BoxGeometry( mySceneW * 2, wallThickness, 100);
-    // material = new THREE.MeshLambertMaterial( {color: 0xaaaaaa} );
-    // myFloor  = new THREE.Mesh( geometry, material );
-    // // myFloor.lookAt(new THREE.Vector3(0,1,0));
-    // myFloor.position.set(myCenterX, bottomB - (wallThickness / 2), 0.0);
-    // myFloor.receiveShadow = true;
-    // PIEaddElement(myFloor);
 
-    /* Ceiling */
-        // geometry = new THREE.BoxGeometry( mySceneW * 2, wallThickness, 100 );
-        // material = new THREE.MeshLambertMaterial( {color: 0xffffff} );
-        // myCeiling = new THREE.Mesh( geometry, material );
-        // myCeiling.position.set(myCenterX, topB+(wallThickness/2), 0.0);
-        // myFloor.receiveShadow = true;
-        // PIEaddElement(myCeiling);
-    /* Left */
-        // geometry = new THREE.BoxGeometry( wallThickness, mySceneH * 2, 100 );
-        // material = new THREE.MeshLambertMaterial( {color: 0xaa0000} );
-        // myLeft = new THREE.Mesh( geometry, material );
-        // myLeft.position.set(leftB-(wallThickness/2), myCenterY, 0.0);
-        // myLeft.receiveShadow = true;
-        // PIEaddElement(myLeft);
-    /* Right */
-        // geometry = new THREE.BoxGeometry( wallThickness, mySceneH * 2, 100 );
-        // material = new THREE.MeshLambertMaterial( {color: 0xaa0000} );
-        // myRight = new THREE.Mesh( geometry, material );
-        // myRight.position.set(rightB+(wallThickness/2), myCenterY, 0.0);
-        // myRight.receiveShadow = true;
-        // PIEaddElement(myRight);
-    /* Back */
-    // material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: texture } );
-    // geometry = new THREE.PlaneBufferGeometry( mySceneW * 2, mySceneH * 2 );
     geometry = new THREE.BoxGeometry( mySceneW * 2, mySceneH * 2, wallThickness );
-    material = new THREE.MeshLambertMaterial( {color: 0x0000aa} );
+    material = new THREE.MeshLambertMaterial( {color: 0xffee58} );
     myBack = new THREE.Mesh( geometry, material );
     myBack.position.set(myCenterX, myCenterY, backB - (wallThickness / 2));
     myBack.receiveShadow = true;
@@ -543,16 +567,16 @@ function resetExperiment()
     /* Reset Wall position */
     /* Floor */
 
-    myBall.position.set(1.7, 1.1 , 0.0);
+    mylevel.position.set(1.7, 1.1 , 0.0);
 //    console.log(myCenterX, bottomB - (wallThickness / 2), 0.0);
     /* Ceiling */
     //sph.position.set(1.7, 1.1,0.0);
 
 //    myCeiling.position.set(myCenterX, topB+(wallThickness/2), 0.0);
     /* Left */
- //   myLeft.position.set(1.5, 1.1, 0.0 );
+ //   myballoon.position.set(1.5, 1.1, 0.0 );
     /* Right */
- //   myRight.position.set(rightB+(wallThickness/2), myCenterY, 0.0);
+ //   myFlow.position.set(rightB+(wallThickness/2), myCenterY, 0.0);
     /* Back */
     myBack.position.set(myCenterX, myCenterY, backB - (wallThickness / 2));
 }
@@ -592,9 +616,9 @@ var boundaryT;      /* Boundary Event Time */
 var tempT;          /* Temporary time */
 
     /* Load Ball coordinates */
-    myBallX = myBall.position.x;
-    myBallY = myBall.position.y;
-    myBallZ = myBall.position.z;
+    myBallX = mylevel.position.x;
+    myBallY = mylevel.scale.y;
+    myBallZ = mylevel.position.z;
 //    console.log(myBallX,myBallY,myBallZ);
     /* Intialise for boundary detection */
     changeX   = 1;
@@ -677,19 +701,27 @@ var tempT;          /* Temporary time */
     myBallVY = (myBallVY + myBallAY * boundaryT) * changeY;
     myBallAX = myBallAX;
     myBallAY = myBallAY;
-    radius +=0.0001;
+
+// 
+    
+
+//level
+    
+            // var rectLength = 0.207;
+           // //  if(rectWidth < 0.144) {
+                  count +=0.04;
+           //  //     console.log('Yayy');
+             myFlowOther.scale.x=3;
+             myFlowOther.scale.y=count;
+             myFlowOther.scale.z=3;
 
 
-     geometry = new THREE.SphereGeometry( radius, 32, 32 );
-     console.log(radius);
-     material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-     var myLeft = new THREE.Mesh( geometry, material );
-     myLeft.position.set( 2.39, 0.82, 0.2);
-     myLeft.position.needsUpdate = true;
-    myLeft.geometry.dynamic = true;
-     PIEaddElement(myLeft);    /* Set Ball position */
-    myBall.position.set(myBallX, myBallY, myBallZ);
-
+//balloon
+        scaleSphereX+=0.001;
+        scaleSphereY+=0.002;
+        myballoon.scale.x=scaleSphereX;
+        myballoon.scale.x=scaleSphereY;
+        myballoon.scale.x=scaleSphereX;
 
     /* Adjust Simulation time in case boundary event has occured */
     boundaryT *= 1000;
