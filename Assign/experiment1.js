@@ -31,6 +31,9 @@ var myballoon;             /* Left */
 var myFlowOther;
 var myNewLevel;
 var tap;
+var tap1;
+var tap2;
+var tap3;
 /* Ball variables */
 
 var mylevel;             /* Ball Object */
@@ -481,7 +484,7 @@ var texture;
 
     material = new THREE.LineBasicMaterial( { color:0x03A9F4, linewidth: 405 } );
     myFlow = new THREE.Line(geometry, material);
-    myFlow.position.set( 1.39, 0.82, 0.0);
+    myFlow.position.set( 1.38, 0.80, 0.0);
     myFlow.scale.set( 1, 1, 1 );
     PIEaddElement(myFlow);
 
@@ -505,12 +508,37 @@ var texture;
         console.log(myFlowOther.position.y);
 
 //tap
-torusKnotGeo = new THREE.TorusKnotGeometry(50, 10, 128, 16);
-phongMat2 = new THREE.MeshPhongMaterial( { color: 0x03A9F4} );
-tap = new THREE.Mesh(torusKnotGeo, phongMat2);
+var cylindergeometry = new THREE.CylinderGeometry(0.1, 0.1, 2);
+var cylindermaterial = new THREE.MeshLambertMaterial({wireframe: false, color: 0xc0c0c0});
+tap = new THREE.Mesh(cylindergeometry, cylindermaterial);
     PIEaddElement(tap);
-    tap.position.set( 1.655, 0.665 , 0.0 );
-    tap.scale.set( 0.3, 30, 30 );
+    tap.position.set( 1.63, 2.1 , 0.0 );
+    tap.scale.set( 0.3, 0.3, 0.3 );
+    //tap.rotation.set(-Math.PI/2, Math.PI/2000, Math.PI); 
+    tap.rotation.z = Math.PI / 2;
+
+var cylindergeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.5);
+var cylindermaterial = new THREE.MeshLambertMaterial({wireframe: false, color: 0xc0c0c0});
+tap1 = new THREE.Mesh(cylindergeometry, cylindermaterial);
+    PIEaddElement(tap1);
+    tap1.position.set( 1.77, 2.19 , 0.0 );
+    tap1.scale.set( 0.3, 0.3, 0.3 );
+
+var cylindergeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.5);
+var cylindermaterial = new THREE.MeshLambertMaterial({wireframe: false, color: 0xc0c0c0});
+tap2 = new THREE.Mesh(cylindergeometry, cylindermaterial);
+    PIEaddElement(tap2);
+    tap2.position.set( 1.77, 2.27 , 0.0 );
+    tap2.scale.set( 0.3, 0.3, 0.3 );
+    tap2.rotation.z = Math.PI / 2;
+
+var cylindergeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.3);
+var cylindermaterial = new THREE.MeshLambertMaterial({wireframe: false, color: 0xc0c0c0});
+tap3 = new THREE.Mesh(cylindergeometry, cylindermaterial);
+    PIEaddElement(tap3);
+    tap3.position.set( 1.92, 2.078 , 0.0 );
+    tap3.scale.set( 0.3, 0.3, 0.3 );
+
 //back
     //  loader = new THREE.TextureLoader();
     // texture = loader.load( 'images/brick_bump.jpg' );
