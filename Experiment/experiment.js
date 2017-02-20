@@ -108,8 +108,9 @@ var levelAdjust;
  * <p>
  * @param newValue       New Value of the slider
  */
-    function dothings() {
-        console.log('clicking');
+   function dothings() {
+        //tap2.rotation.set(-Math.PI/2,0,0);
+        //PIErender(); 
     }
 function handleX(newValue)
 {
@@ -143,7 +144,6 @@ function handleY(newValue)
  */
 function handleVX(newValue)
 {
-	//    console.log(myBallVX,newValue);
 	myBallVX = newValue;
 }
 
@@ -151,26 +151,16 @@ function handleVX(newValue)
 function initialiseControlVariables()
 {
 	/* Labels */
-	PosX="X";                  /* X Position Slider Label */
-	PosY="Y";                  /* Y Position Slider Label */
 	VelX="Velocity";                 /* X Velocity Slider Label */
 
 	/* Default (initial) Values */
-	Xdefault=myCenterX;        /* X Position Slider Default Value */
-	Ydefault=0.0;        /* Y Position Slider Default Value */
 	VXdefault=2.0;             /* X Velocity Slider Default Value */
 
 	/* Slider Limits */
-	Xmin=myCenterX;   /* X Position Slider Minimum Value */
-	Xmax=myCenterX;  /* X Position Slider Maximum Value */
-	Ymin=0.0; /* Y Position Slider Minimum Value */
-	Ymax=10.0;    /* Y Position Slider Maximum Value */
 	VXmin= 1.0;                /* X Velocity Slider Minimum Value */
-	VXmax= 3.0;                /* X Velocity Slider Maximum Value */
+	VXmax= 5.0;                /* X Velocity Slider Maximum Value */
 
 	/* Slider Steps */
-	Xstep=0.1;                 /* X Position Slider Step */
-	Ystep=0.1;                  /* Y Position Slider Step */
 	VXstep=1.0;                 /* X Velocity Slider Step */
 	radius=0.09;
 	rectWidth = 0.046;
@@ -186,12 +176,8 @@ function initialiseControls()
 {
 	initialiseControlVariables();
 	/* Create Input Panel */
-	PIEaddInputSlider(PosX, Xdefault, handleX, Xmin, Xmax, Xstep);
-	PIEaddInputSlider(PosY, Ydefault, handleY, Ymin, Ymax, Ystep);
 	PIEaddInputSlider(VelX, VXdefault, handleVX, VXmin, VXmax, VXstep);
 	/* Create Display Panel */
-	PIEaddDisplayText(PosX, Xdefault);
-	PIEaddDisplayText(PosY, Ydefault);
 	PIEaddDisplayText(VelX, VXdefault);
 
 }
@@ -214,18 +200,14 @@ function initialiseHelp()
 	helpContent = helpContent + "<p>The initial state is setup stage. In this stage, you can see a control window at the right. You have access to three sliders.</p>";
 	helpContent = helpContent + "<p>You can control the following:</p>";
 	helpContent = helpContent + "<ul>";
-	helpContent = helpContent + "<li>X&nbsp;&nbsp;:&nbsp;Shows the X position of the level.</li>";
-	helpContent = helpContent + "<li>Y&nbsp;&nbsp;:&nbsp;Shows the height of water level.</li>";
-	helpContent = helpContent + "<li>VX&nbsp;:&nbsp;Controls the  velocity of the level.(Range 1-3)</li>";
+	helpContent = helpContent + "<li>VX&nbsp;:&nbsp;Controls the  velocity of the level.(Range 1-5)</li>";
 	helpContent = helpContent + "</ul>";
 	helpContent = helpContent + "<p>Once you setup the experiment, you can enter the animation stage by clicking the start button</p>";
 	helpContent = helpContent + "<h3>The animation stage</h3>";
 	helpContent = helpContent + "<p>In the animation stage, the container will be filled and the balloon will inflate or deflate accordingly obeying the laws of physics.</p>";
 	helpContent = helpContent + "<p>The right hand panel now shows the values of the three experiment variables during animation.</p>";
 	helpContent = helpContent + "<ul>";
-    helpContent = helpContent + "<li>X&nbsp;&nbsp;:&nbsp;Shows the X position of the level.</li>";
-    helpContent = helpContent + "<li>Y&nbsp;&nbsp;:&nbsp;Shows the height of water level.</li>";
-    helpContent = helpContent + "<li>VX&nbsp;:&nbsp;Controls the  velocity of the level.(Range 1-3)</li>";
+    helpContent = helpContent + "<li>VX&nbsp;:&nbsp;Controls the  velocity of the level.(Range 1-5)</li>";
 	helpContent = helpContent + "</ul>";
 	helpContent = helpContent + "<p>You can pause and resume the animation by using the pause/play nutton on the top line</p>";
 	helpContent = helpContent + "<h2>Happy Experimenting</h2>";
@@ -269,6 +251,7 @@ function initialiseScene()
 	maxHeight=623.3;
 	levelThreshold=125.2;
 	levelAdjust=137.2;
+	myBallVX = 2.0;
 
 }
 
@@ -438,7 +421,7 @@ function loadExperimentElements()
 	tap1.position.set( 1.6, 2.19 , backB );
     tap1.scale.set( 0.55, 0.55, 0.55 );
 
-	var cylindergeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.4);
+	var cylindergeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.5);
 	var cylindermaterial = new THREE.MeshLambertMaterial({wireframe: false, color: 0xc0c0c0});
 	tap2 = new THREE.Mesh(cylindergeometry, cylindermaterial);
 	PIEaddElement(tap2);
@@ -534,9 +517,9 @@ function loadExperimentElements()
     document.addEventListener( 'mousedown', onDocumentMouseDown, false );
     function onDocumentMouseDown( event ) 
     {
-        if(event.screenX>460 && event.screenX<490  && event.screenY>352 && event.screenY<362  ) {
-          //  console.log(event.screenX,event.screenY);
-            dothings();    
+        if(event.screenX>613 && event.screenX<648  && event.screenY>349 && event.screenY<361  ) {
+            console.log(event.screenX,event.screenY);
+            dothings(event);
         }
     }
 
@@ -569,10 +552,9 @@ function resetExperiment()
 	initialiseOtherVariables();
 
 	/* Initialise Ball variables */
-	myBallX      = myCenterX;
-	myBallY      = myCenterY;
-	myBallVX     = 2.0;
-	myBallVY     = 0.0;
+
+	//myBallVX     = 2.0;
+//console.log(myBallVX);
     count        = 3.0;
     scaleSphereX = 0.3;
     scaleSphereY = 0.3;
@@ -619,7 +601,7 @@ function updateExperimentElements(t, dt)
 	var changeY;        /* Y boundary hit */
 	var boundaryT;      /* Boundary Event Time */
 	var tempT;          /* Temporary time */
-
+//	console.error(myBallVX);
 	/* Load Ball coordinates */
 	myBallX = mylevel.position.x;
 	myBallY = mylevel.scale.y;
@@ -631,38 +613,38 @@ function updateExperimentElements(t, dt)
 	boundaryT = dt / 1000.0;    /* convert to seconds */
 	//    console.log(boundaryT,dt);
 	/* Compute new myBall position and check for boundary event */
-	newX = myBallX + myBallVX * boundaryT ; //s=s0+ut
 	//    console.log(newX);
 
-	/* Recompute Position, Velocity, Acceleration using boundaryT */
 	myBallX  = myCenterX; 
 	myBallY  = count/100;
 	myBallVX = myBallVX;
 
 
-
 	//changing velocity
 	if(myBallVX==2) {
-		factor=1
+		factor=1;
 	}
 	else if(myBallVX==1) {
-		factor=1/2;
+		factor=0.50;
+	}
+	else if(myBallVX==3) {
+		factor=1.50;
+	}
+	else if(myBallVX==4) {
+		factor=2;
 	}
 	else {
-		factor = 2;
+		factor =2.50;
 	}
 
 	//my flow
 	if(count>maxHeight) {
-		PIEscene.remove(myFlow);
+		myFlow.scale.set( 0, 0, 0 );
 	}
 	else {
 		myFlow.scale.set( 1, 1, 1 );
 	}
 
-    function dothings() {
-        console.log('Clicked');
-    }
 
 	//level
 
@@ -719,8 +701,8 @@ function updateExperimentElements(t, dt)
 	if (boundaryT < dt) { PIEadjustAnimationTime(dt - boundaryT); }
 
 	/* Finally Update the Display Panel with new values */
-	PIEchangeDisplayText(PosX, myBallX);
-	PIEchangeDisplayText(PosY, myBallY);
+	//PIEchangeDisplayText(PosX, myBallX);
+	//PIEchangeDisplayText(PosY, myBallY);
 	PIEchangeDisplayText(VelX, myBallVX);
 }
 
