@@ -29,11 +29,25 @@ var myBack;             /* Back */
 var countOnMe;
 var vertices = [];
 var globalScope ={};
+var arrayofShapes = {
+3:"triangle",
+4:"quadrilateral",
+5:"pentagon",
+6:"hexagon",
+7:"heptagon",
+8:"octagon",
+9:"enneagon",
+10:"decagon",
+11:"hendecagon",
+12:"dodecagon"
+}
 
 //figure vars
 var buttonRight;
 var buttonLeft;
 var buttonDiagonal;
+var toggle = true;
+var buttonExterior;
 
 // ********************************************************************************************************************
 
@@ -71,6 +85,9 @@ function initialiseOtherVariables()
 
     //shape vars
     countOnMe = 4;
+
+    //figure vars
+    toggle = true;
 }
 
 // *******************************************************************************************************************
@@ -102,25 +119,46 @@ function createShapeGeometry (n, sides,circumradius) {
 }
 
 //do things ******************************************************************************************************************
+function showMeMagicText(tag,index,to,lft) {
+    var x = document.getElementsByTagName(tag);
+    var parentDiv = x[0].parentNode;
+    var para2 = document.createElement(tag);
+    para2.textContent = index;
+    parentDiv.replaceChild(para2,x[0]);
+    return para2;
+}
+
+function hola() {
+    var x = document.getElementsByTagName("P");
+    var parentDiv = x[0].parentNode;
+    var sp1 = document.createElement("P");
+    sp1.id = "newSpan";
+    var sp1_content = document.createTextNode("new replacement span element.");
+    sp1.appendChild(sp1_content);
+    sp1.style.cssText = 'position:absolute;top:470px;left:600px;font-weight: bold;font-size:large;';
+    sp1.addEventListener("mouseover",hola);
+    parentDiv.replaceChild(sp1,x[0]);
+}
+
 function removeEntity(object) {
     var selectedObject = PIEscene.getObjectByName(object.name);
-    console.log(selectedObject);
     PIEscene.remove( selectedObject );
-    PIErender();
 }
 
 function showMeMagicRight() {
-        countOnMe+=1;
-        for(var i=0;i<(countOnMe-1);i++) {
-            //console.log(globalScope["line1"]);
+    if(toggle==false) {
+        toggle = true;
+        var thres = countOnMe*(countOnMe-3);
+        for(var i=0;i<thres;i++) {
             removeEntity(globalScope["line"+i])
-                    // var p ="hola";
-                    // var sphereObject = PIEscene.getObjectByName(p);
-                    // console.log(sphereObject);
-                    // PIEscene.remove(sphereObject);
-                    // PIErender();
         }
-       // console.log(countOnMe);
+    }
+
+//change text
+        var para2 =showMeMagicText("H2",arrayofShapes[countOnMe],"470px","600px");
+        para2.style.cssText = 'position:absolute;top:470px;left:600px;font-weight: bold;font-size:large;';
+        PIErender();
+        countOnMe+=1;
         PIEscene.remove(myBall);
         myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
         myBall.position.set(myBallX, myBallY, myBallZ);
@@ -139,31 +177,51 @@ function showMeMagicLeft() {
 }
 
 function showMeMagicDiagonal() {
-    vertices = vertices.concat(vertices);
-   // console.table(vertices);
-    var i,j,k;
-    var watch=0;
-//drawing diagonals     
-    for(i=0;i<countOnMe;i++) {
-        k = i+2;
-        for(j=k;j<(k+(countOnMe-3));j++) {
-            var geometry = new THREE.Geometry();
-            geometry.vertices.push(
-                new THREE.Vector3( vertices[i][0], vertices[i][1], 0 ),
-                new THREE.Vector3( vertices[j][0], vertices[j][1], 0 ),
-                new THREE.Vector3( vertices[j][0], vertices[j][1], 0 )
-            );
-            var material = new THREE.LineBasicMaterial({color: 0x0000ff});
-            globalScope["line"+watch] = new THREE.Line( geometry, material );
-            globalScope["line"+watch].position.set(myBallX, myBallY, 0.1);
-            globalScope["line"+watch].name = "line"+watch;
-            PIEaddElement(globalScope["line"+watch]);
-            watch+=1;
+    if(toggle) {
+        toggle= false;
+        vertices = vertices.concat(vertices);
+       // console.table(vertices);
+        var i,j,k;
+        globalScope ={};
+        var watch=0;
+    //drawing diagonals     
+        for(i=0;i<countOnMe;i++) {
+            k = i+2;
+            for(j=k;j<(k+(countOnMe-3));j++) {
+                var geometry = new THREE.Geometry();
+                geometry.vertices.push(
+                    new THREE.Vector3( vertices[i][0], vertices[i][1], 0 ),
+                    new THREE.Vector3( vertices[j][0], vertices[j][1], 0 ),
+                    new THREE.Vector3( vertices[j][0], vertices[j][1], 0 )
+                );
+                var material = new THREE.LineBasicMaterial({color: 0x0000ff});
+                globalScope["line"+watch] = new THREE.Line( geometry, material );
+                globalScope["line"+watch].position.set(myBallX, myBallY, 0.1);
+                globalScope["line"+watch].name = "line"+watch;
+                PIEaddElement(globalScope["line"+watch]);
+                watch+=1;
+            }
         }
+    //    console.log(watch);
+        PIErender();
     }
-   // console.log(globalScope.line0);
-    PIErender();
+    else {
+        toggle = true;
+        var thres = countOnMe*(countOnMe-3);
+        for(var i=0;i<thres;i++) {
+            removeEntity(globalScope["line"+i]);
+        }
+        PIErender();
+    }
 }
+
+
+function showMeMagicExterior() {
+    var angle = (countOnMe-2) * (180 / countOnMe);
+    var para = showMeMagicText("H1",angle,"270px","250px");   
+    para.style.cssText = 'position:absolute;top:270px;left:250px;font-weight: bold;font-size:large;';
+}
+
 // ********************************************************************************************************************
 
 /**
@@ -219,10 +277,27 @@ var texture;
     buttonDiagonal = createButton('850px','250px','70px','40px','Diagonal');
     buttonDiagonal.addEventListener("click", showMeMagicDiagonal);
     document.body.appendChild(buttonDiagonal);
+    //exterior angle button
+    buttonExterior = createButton('850px','150px','70px','40px','Exterior angles');
+    buttonExterior.addEventListener("click", showMeMagicExterior);
+    document.body.appendChild(buttonExterior);    
+
+//texts ----------------------------------------------------------------------
+    var para = document.createElement("H2");
+    para.textContent = "Triangle";
+    para.style.cssText = 'position:absolute;top:470px;left:600px;font-weight: bold;font-size:large;';
+    document.body.appendChild(para);
+   // para.addEventListener("mouseover",hola);
+
+    //exterior angle text
+    var para2 = document.createElement("H1");
+    para2.textContent = "";
+    para2.style.cssText = 'position:absolute;top:270px;left:250px;font-weight: bold;font-size:large;';
+    document.body.appendChild(para2);
+
 
 // Create Shape and add it to scene -------------------------------------------
     myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
-//    console.table(vertices);
     PIEaddElement(myBall); //2, 1.5, 0.1
 
 
