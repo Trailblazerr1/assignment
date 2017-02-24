@@ -13,7 +13,9 @@ var mySceneW;          /* Scene Width */
 var mySceneH;          /* Scene Height */
 var myCenterX;         /* Scene Center X coordinate */
 var myCenterY;         /* Scene Center Y coordinate */
-
+var line;
+var MAX_POINTS = 500;
+var drawCount;
 /* Room Variables */
 var leftB;              /* Left Barrier */
 var rightB;             /* Right Barrier */
@@ -47,7 +49,12 @@ var buttonRight;
 var buttonLeft;
 var buttonDiagonal;
 var toggle = true;
+var toggle1 =true;
+var count1=0;
+var count2=0;
+var toggle2 = true;
 var buttonExterior;
+var buttonInterior;
 
 // ********************************************************************************************************************
 
@@ -91,6 +98,19 @@ function initialiseOtherVariables()
 }
 
 // *******************************************************************************************************************
+function animate() {
+    requestAnimationFrame( animate );
+    drawCount = ( drawCount + 1 ) % MAX_POINTS;
+    line.geometry.setDrawRange( 0, drawCount );
+    if ( drawCount === 0 ) {
+        // periodically, generate new data
+        updatePositions();
+        line.geometry.attributes.position.needsUpdate = true; // required after the first render
+        line.material.color.setHSL( Math.random(), 1, 0.5 );
+    }
+    PIErender();
+}
+
 
 function createShapeGeometry (n, sides,circumradius) {
 
@@ -112,7 +132,6 @@ function createShapeGeometry (n, sides,circumradius) {
     for (x = 0; x < n; x++) {
         shape.lineTo.apply(shape, vertices[x]);
     }
-
     geometry= new THREE.ShapeGeometry(shape);
     material = new THREE.MeshBasicMaterial( { color: 0x03A9F4 } );
     return new THREE.Mesh( geometry, material );
@@ -123,7 +142,9 @@ function showMeMagicText(tag,index,to,lft) {
     var x = document.getElementsByTagName(tag);
     var parentDiv = x[0].parentNode;
     var para2 = document.createElement(tag);
+    //console.log(index);
     para2.textContent = index;
+
     parentDiv.replaceChild(para2,x[0]);
     return para2;
 }
@@ -146,6 +167,15 @@ function removeEntity(object) {
 }
 
 function showMeMagicRight() {
+//set slider
+    var inn = document.getElementsByTagName('input');
+    console.log(inn[0]);
+    inn[0].checked = false;
+    inn[1].checked = false;
+    count1=0;count2=0;toggle1=true;toggle2=true;
+    var para = showMeMagicText("H1","","270px","250px");
+    var para = showMeMagicText("H3","","270px","250px");
+    console.log(inn[0]);
     if(toggle==false) {
         toggle = true;
         var thres = countOnMe*(countOnMe-3);
@@ -153,25 +183,48 @@ function showMeMagicRight() {
             removeEntity(globalScope["line"+i])
         }
     }
-
+        this.style.border = 0;
 //change text
-        var para2 =showMeMagicText("H2",arrayofShapes[countOnMe],"470px","600px");
-        para2.style.cssText = 'position:absolute;top:470px;left:600px;font-weight: bold;font-size:large;';
-        PIErender();
-        countOnMe+=1;
+    console.log(countOnMe);
         PIEscene.remove(myBall);
+        if(countOnMe<12) 
+            countOnMe+=1;
+        var para2 =showMeMagicText("H2",countOnMe+ "-"+ arrayofShapes[countOnMe],"450px","460px");
+        para2.style.cssText = 'position:absolute;top:450px;left:410px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 25px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+//        PIErender();
         myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
-        myBall.position.set(myBallX, myBallY, myBallZ);
+        myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
         PIEaddElement(myBall);
         PIErender();
 }
 
 function showMeMagicLeft() {
-        countOnMe-=1;
-      //  console.log(countOnMe);
+//slider reset
+    var inn = document.getElementsByTagName('input');
+    console.log(inn[0]);
+    inn[0].checked = false;
+    inn[1].checked = false;
+    count1=0;count2=0;toggle1=true;toggle2=true;
+    var para = showMeMagicText("H1","","270px","250px");
+    var para = showMeMagicText("H3","","270px","250px");
+
+    if(toggle==false) {
+        toggle = true;
+        var thres = countOnMe*(countOnMe-3);
+        for(var i=0;i<thres;i++) {
+            removeEntity(globalScope["line"+i])
+        }
+    }
+        this.style.border = 0;
+//change text
         PIEscene.remove(myBall);
+        if(countOnMe>3)
+            countOnMe-=1;
+        var para2 =showMeMagicText("H2",countOnMe+ "-"+ arrayofShapes[countOnMe],"450px","460px");
+        para2.style.cssText = 'position:absolute;top:450px;left:410px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 25px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+       // PIErender();
         myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
-        myBall.position.set(myBallX, myBallY, myBallZ);
+        myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
         PIEaddElement(myBall);
         PIErender();
 }
@@ -196,13 +249,13 @@ function showMeMagicDiagonal() {
                 );
                 var material = new THREE.LineBasicMaterial({color: 0x0000ff});
                 globalScope["line"+watch] = new THREE.Line( geometry, material );
-                globalScope["line"+watch].position.set(myBallX, myBallY, 0.1);
+                globalScope["line"+watch].position.set(myBallX-0.8, myBallY+0.3, 0.1);
                 globalScope["line"+watch].name = "line"+watch;
                 PIEaddElement(globalScope["line"+watch]);
                 watch+=1;
             }
         }
-    //    console.log(watch);
+       console.table(globalScope);
         PIErender();
     }
     else {
@@ -217,11 +270,67 @@ function showMeMagicDiagonal() {
 
 
 function showMeMagicExterior() {
-    var angle = (countOnMe-2) * (180 / countOnMe);
+    count1+=1;
+    if(toggle1) {
+            if(count1%2==0)
+                toggle1=false;
+    console.log(toggle1,count1);
+
+             var angle = Math.round((360/countOnMe)*100)/100;
+            // var rad = angle*Math.PI/180;
+            // //circle
+            // var geometry = new THREE.CircleGeometry( 0.13, 32,Math.PI/2,rad);
+            // var material = new THREE.MeshBasicMaterial( { color: 'red' } );
+            // var circle = new THREE.Mesh( geometry, material );
+            // console.log(rad);
+            // circle.position.set((myBallX-0.8)+vertices[0][0], (myBallY+0.3)+vertices[0][1], 0.1)
+            // PIEaddElement( circle );
+            // PIErender();
+    //text
     var para = showMeMagicText("H1",angle,"270px","250px");   
-    para.style.cssText = 'position:absolute;top:270px;left:250px;font-weight: bold;font-size:large;';
+    para.style.cssText = 'position:absolute;top:180px;left:750px;  font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 32px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+     //   PIErender();
+    }
+    else {
+            if(count1%2==0)
+                toggle1=true;
+        var para = showMeMagicText("H1","","270px","250px");
+       // PIErender();
+    }
 }
 
+function showMeMagicInterior() {
+    count2+=1;
+    if(toggle2) {
+            if(count2%2==0)
+                toggle2=false;
+    var angle = Math.round((countOnMe-2) * (180 / countOnMe)*100)/100;
+    var para = showMeMagicText("H3",angle,"270px","250px");   
+    para.style.cssText = 'position:absolute;top:80px;left:750px; font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 32px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+    }
+    else {
+            if(count2%2==0)
+                toggle2=true;
+        var para = showMeMagicText("H3","","270px","250px");
+                    }
+}
+
+function updatePositions() {
+    var positions = line.geometry.attributes.position.array;
+    var x = y = z = index = 0;
+    for ( var i = 0, l = MAX_POINTS; i < l; i ++ ) {
+
+        positions[ index ++ ] = x;
+        positions[ index ++ ] = y;
+        positions[ index ++ ] = z;
+
+        x += ( Math.random() - 0.5 ) * 30;
+        y += ( Math.random() - 0.5 ) * 30;
+        z += ( Math.random() - 0.5 ) * 30;
+
+    }
+
+}
 // ********************************************************************************************************************
 
 /**
@@ -251,53 +360,99 @@ var texture;
     initialiseOtherVariables();
 
 // buttons --------------------------------------------------------------------
+function createLabel(lft,topp,w,h,name) {
+    var lab = document.createElement('span');
+    lab.innerHTML = '<label class="switch"> <input type="checkbox"> <div class="slider round"></div> <style scoped>.switch{position:relative;display:inline-block;width:60px;height:34px}.switch input{display:none}.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;-webkit-transition: .4s;transition: .4s}.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background-color:white;-webkit-transition: .4s;transition: .4s}input:checked+.slider{background-color:#2196F3}input:focus+.slider{box-shadow:0 0 1px #2196F3}input:checked+.slider:before{-webkit-transform:translateX(26px);-ms-transform:translateX(26px);transform:translateX(26px)}.slider.round{border-radius:34px}.slider.round:before{border-radius:50%}</style> </label>';
+    return lab;
+}
     
-    function createButton(lft,top,w,h,name) {
+    function createButton(lft,topp,w,h,name) {
         var button = document.createElement('button');
         button.type = 'button';
         button.innerHTML=name;
-        button.style.position = 'absolute';
-        button.style.left = lft;
-        button.style.top = top;
-        button.style.width = w; //size of button    
-        button.style.height = h; //size of buttonRight.    
+        //button.style.position = 'absolute';
+       // button.style.left = lft;
+        // button.style.top = top;
+        // button.style.width = w; //size of button    
+        // button.style.height = h; //size of buttonRight.    
+
         //button.style.padding = '10px';
         return button;
     }
 
+function mouseOver() {
+              this.style.backgroundColor = "#9933ff";
+}
+function mouseOut() {
+              this.style.backgroundColor = "#e8e8e8";
+              this.style.border = " 2px solid #444";
+}
+
     //right button
     buttonRight = createButton('850px','450px','50px','40px','Go on');
+    buttonRight.style.cssText = 'top:480px;left:650px;width: 72px;height: 72px;line-height: 72px;display: block;position: relative;-moz-border-radius: 50%;-webkit-border-radius: 50%;border-radius: 50%;border: 2px solid #444;text-align: center;display: inline-block;vertical-align: middle;position: absolute;z-index: 10;color: #333;  outline: none;cursor: pointer;';
+    buttonRight.addEventListener("mouseover", mouseOver, false);
+    buttonRight.addEventListener("mouseout", mouseOut, false);
     buttonRight.addEventListener("click", showMeMagicRight);
     document.body.appendChild(buttonRight);
+
     //left button
     buttonLeft = createButton('450px','450px','50px','40px','Fall back');
+    buttonLeft.style.cssText = 'top:480px;left:270px;width: 72px;height: 72px;line-height: 72px;display: block;position: relative;-moz-border-radius: 50%;-webkit-border-radius: 50%;border-radius: 50%;border: 2px solid #444;text-align: center;display: inline-block;vertical-align: middle;position: absolute;z-index: 10;color: #333;  outline: none;cursor: pointer;';
+    buttonLeft.addEventListener("mouseover", mouseOver, false);
+    buttonLeft.addEventListener("mouseout", mouseOut, false);
     buttonLeft.addEventListener("click", showMeMagicLeft);
     document.body.appendChild(buttonLeft);
+
     //diagonal button
     buttonDiagonal = createButton('850px','250px','70px','40px','Diagonal');
+    buttonDiagonal.style.cssText = 'position:absolute;top:340px;left:990px; width:70px; height:40px; font-size: 11px;text-decoration: none;margin: 20px;color: #fff;display: inline-block;  background-color: #55acee;cursor: pointer;outline: none;';
     buttonDiagonal.addEventListener("click", showMeMagicDiagonal);
     document.body.appendChild(buttonDiagonal);
+
     //exterior angle button
-    buttonExterior = createButton('850px','150px','70px','40px','Exterior angles');
+    buttonExterior = createLabel('850px','150px','70px','40px','Exterior angles');
+    buttonExterior.style.cssText = 'position:absolute;top:270px;left:990px;cursor: pointer;';
     buttonExterior.addEventListener("click", showMeMagicExterior);
-    document.body.appendChild(buttonExterior);    
+    document.body.appendChild(buttonExterior); 
+    //interior angle button
+    buttonInterior = createLabel('850px','120px','70px','40px','Interior angles');
+    buttonInterior.style.cssText = 'position:absolute;top:200px;left:990px; cursor: pointer;';
+    buttonInterior.addEventListener("click", showMeMagicInterior);
+    document.body.appendChild(buttonInterior);   
 
 //texts ----------------------------------------------------------------------
     var para = document.createElement("H2");
-    para.textContent = "Triangle";
-    para.style.cssText = 'position:absolute;top:470px;left:600px;font-weight: bold;font-size:large;';
+    para.textContent = "4-quadrilateral";
+    para.style.cssText = 'position:absolute;top:450px;left:410px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 22px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
     document.body.appendChild(para);
    // para.addEventListener("mouseover",hola);
 
     //exterior angle text
     var para2 = document.createElement("H1");
     para2.textContent = "";
-    para2.style.cssText = 'position:absolute;top:270px;left:250px;font-weight: bold;font-size:large;';
+    para2.style.cssText = 'position:absolute;top:270px;left:750px;font-weight: bold;font-size:large;';
     document.body.appendChild(para2);
+    //-------
+    var para4 = document.createElement("H4");
+    para4.textContent = "Exterior Angles";
+    para4.style.cssText = 'position:absolute;top:185px;left:1030px; font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 12px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+    document.body.appendChild(para4);
 
+    //interior angle text
+    var para2 = document.createElement("H3");
+    para2.textContent = "";
+    para2.style.cssText = 'position:absolute;top:250px;left:750px;font-weight: bold;font-size:large;';
+    document.body.appendChild(para2);
+    //------
+    var para3 = document.createElement("H5");
+    para3.textContent = "Interior Angles";
+    para3.style.cssText = 'position:absolute;top:105px;left:1030px; font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 12px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+    document.body.appendChild(para3);
 
 // Create Shape and add it to scene -------------------------------------------
     myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
+        //myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
     PIEaddElement(myBall); //2, 1.5, 0.1
 
 
@@ -307,6 +462,7 @@ var texture;
     geometry = new THREE.BoxGeometry( mySceneW * 2, mySceneH * 2, wallThickness );
     material = new THREE.MeshLambertMaterial( {color:0xF9BF3B} );
     myBack = new THREE.Mesh( geometry, material );
+    console.log(myCenterX-0.5, myCenterY, -0.0001);
     myBack.position.set(myCenterX, myCenterY, -0.0001);
     //  myBack.receiveShadow = true;
     myBack.scale.set( 1.3, 1, 1 );
@@ -316,6 +472,26 @@ var texture;
     /* Reset all positions */
     resetExperiment();
     PIEsetAreaOfInterest(mySceneTLX, mySceneTLY, mySceneBRX, mySceneBRY);
+
+
+            // var geometry = new THREE.BufferGeometry();
+            // // attributes
+            // var positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
+            // geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+
+            // // drawcalls
+            // drawCount = 2; // draw the first 2 points, only
+            // geometry.setDrawRange( 0, drawCount );
+
+            // // material
+            // var material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 2 } );
+
+            // // line
+            // line = new THREE.Line( geometry,  material );
+            // PIEaddElement( line );
+
+            // // update positions
+            //     updatePositions();
 }
 
 // ********************************************************************************************************************
@@ -334,7 +510,7 @@ function resetExperiment()
 
     /* Reset Ball position */
     //console.log(myBallX, myBallY, myBallZ);
-    myBall.position.set(myBallX, myBallY, myBallZ);
+    myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
     myBack.position.set(myCenterX, myCenterY, -0.0001);
 
     /* Reset Wall position */
@@ -352,9 +528,11 @@ function resetExperiment()
  */
 function updateExperimentElements(t, dt)
 {
+  //  console.log(t,dt);
 
     var boundaryT;      /* Boundary Event Time */
     var tempT;          /* Temporary time */
+  //  animate();
 
     /* Intialise for boundary detection */
     changeX   = 1;
