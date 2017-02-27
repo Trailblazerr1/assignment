@@ -23,7 +23,10 @@ var bottomB;            /* Bottom Barrier */
 var topB;               /* Top Barrier */
 var backB=-4.0;         /* Back Barrier */
 var wallThickness;      /* Wall Thickness */
-
+var myBallX;
+var myBallY;
+var myBallAX;
+var myBallAY;
 /* Room Objects */
 var myBack;             /* Back */
 
@@ -43,7 +46,7 @@ var arrayofShapes = {
 11:"hendecagon",
 12:"dodecagon"
 }
-
+var dot;
 //figure vars
 var buttonRight;
 var buttonLeft;
@@ -92,6 +95,10 @@ function initialiseOtherVariables()
 
     //shape vars
     countOnMe = 4;
+    myBallX      = myCenterX;
+    myBallY      = myCenterY;
+    myBallAX     = gravityX;
+    myBallAY     = gravityY;
 
     //figure vars
     toggle = true;
@@ -189,12 +196,23 @@ function showMeMagicRight() {
         PIEscene.remove(myBall);
         if(countOnMe<12) 
             countOnMe+=1;
-        var para2 =showMeMagicText("H2",countOnMe+ "-"+ arrayofShapes[countOnMe],"450px","460px");
+        var para2 =showMeMagicText("H2",arrayofShapes[countOnMe],"450px","460px");
         para2.style.cssText = 'position:absolute;top:450px;left:410px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 25px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
 //        PIErender();
         myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
         myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
         PIEaddElement(myBall);
+//add points
+    PIEscene.remove(dot);
+    var dotGeometry = new THREE.Geometry();
+    for(var i=0;i<countOnMe;i++) {
+        dotGeometry.vertices.push(new THREE.Vector3( vertices[i][0] + 1.2,vertices[i][1] + 1.8, myBallZ));
+    }
+    var dotMaterial = new THREE.PointsMaterial( { size: 3,  transparent: true,
+  depthWrite: false, sizeAttenuation: false, color:0x000000 } );
+    dot = new THREE.Points( dotGeometry, dotMaterial );
+    PIEaddElement(dot);
+
         PIErender();
 }
 
@@ -220,7 +238,7 @@ function showMeMagicLeft() {
         PIEscene.remove(myBall);
         if(countOnMe>3)
             countOnMe-=1;
-        var para2 =showMeMagicText("H2",countOnMe+ "-"+ arrayofShapes[countOnMe],"450px","460px");
+        var para2 =showMeMagicText("H2",arrayofShapes[countOnMe],"450px","460px");
         para2.style.cssText = 'position:absolute;top:450px;left:410px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 25px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
        // PIErender();
         myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
@@ -275,17 +293,18 @@ function showMeMagicExterior() {
             if(count1%2==0)
                 toggle1=false;
     console.log(toggle1,count1);
+//angles
+                    // var angle = Math.round((360/countOnMe)*100)/100;
+                    // var rad = angle*Math.PI/180;
+                    // //circle
+                    // var geometry = new THREE.CircleGeometry( 0.13, 32,0,rad);
+                    // var material = new THREE.MeshBasicMaterial( { color: 'red' } );
+                    // var circle = new THREE.Mesh( geometry, material );
+                    // console.log(rad);
+                    // circle.position.set((myBallX-0.8)+vertices[0][0], (myBallY+0.3)+vertices[0][1], 0.1)
+                    // PIEaddElement( circle );
+                    // PIErender();
 
-             var angle = Math.round((360/countOnMe)*100)/100;
-            // var rad = angle*Math.PI/180;
-            // //circle
-            // var geometry = new THREE.CircleGeometry( 0.13, 32,Math.PI/2,rad);
-            // var material = new THREE.MeshBasicMaterial( { color: 'red' } );
-            // var circle = new THREE.Mesh( geometry, material );
-            // console.log(rad);
-            // circle.position.set((myBallX-0.8)+vertices[0][0], (myBallY+0.3)+vertices[0][1], 0.1)
-            // PIEaddElement( circle );
-            // PIErender();
     //text
     var para = showMeMagicText("H1",angle,"270px","250px");   
     para.style.cssText = 'position:absolute;top:180px;left:750px;  font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 32px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
@@ -332,7 +351,49 @@ function updatePositions() {
 
 }
 // ********************************************************************************************************************
+function initialiseHelp()
+{
+    helpContent="";
+    helpContent = helpContent + "<h2> Regular polygons help</h2>";
+    helpContent = helpContent + "<h3>About the experiment</h3>";
+    helpContent = helpContent + "<p>The experiment shows polygons of different sides.</p>";
+    helpContent = helpContent + "<h3>Animation control</h3>";
+    helpContent = helpContent + "<p>The top line has animation controls. There are two states of the experiment.</p>";
+    helpContent = helpContent + "<h3>The setup stage</h3>";
+    helpContent = helpContent + "<p>The initial state is setup stage. In this stage, you can see a control window at the right. You have access to three sliders.</p>";
+    helpContent = helpContent + "<p>You can control the following:</p>";
+    helpContent = helpContent + "<ul>";
+    helpContent = helpContent + "<li>VX&nbsp;:&nbsp;Controls the  velocity of the level.(Range 1-5)</li>";
+    helpContent = helpContent + "</ul>";
+    helpContent = helpContent + "<p>Once you setup the experiment, you can enter the animation stage by clicking the start button</p>";
+    helpContent = helpContent + "<h3>The animation stage</h3>";
+    helpContent = helpContent + "<p>In the animation stage, the container will be filled and the balloon will inflate or deflate accordingly obeying the laws of physics.</p>";
+    helpContent = helpContent + "<p>The right hand panel now shows the values of the three experiment variables during animation.</p>";
+    helpContent = helpContent + "<ul>";
+    helpContent = helpContent + "<li>VX&nbsp;:&nbsp;Controls the  velocity of the level.(Range 1-5)</li>";
+    helpContent = helpContent + "</ul>";
+    helpContent = helpContent + "<p>You can pause and resume the animation by using the pause/play nutton on the top line</p>";
+    helpContent = helpContent + "<h2>Happy Experimenting</h2>";
+    PIEupdateHelp(helpContent);
+}
 
+var infoContent;
+function initialiseInfo()
+{
+    infoContent =  "";
+    infoContent = infoContent + "<h2> Regular polygons concepts</h2>";
+    infoContent = infoContent + "<h3>About the experiment</h3>";
+    infoContent = infoContent + "<p>The experiment shows a container placed under water tap.</p>";
+    infoContent = infoContent + "<h3>Pressure</h3>";
+    infoContent = infoContent + "<p>As the water fills the container, it starts exerting pressure to its sides.</p>";
+    infoContent = infoContent + "<p>As more and more water fills the container, the pressure at side increases.</p>";
+    infoContent = infoContent + "<p>This leads to gradual blowing up of balloon.</p>";
+    infoContent = infoContent + "<p>When the velocity of water is slow, balloon blows up slowly.</p>";
+    infoContent = infoContent + "<p>As the speed of pouring water increases, the balloon blows faster.</p>";
+    infoContent = infoContent + "<h2>Happy Experimenting</h2>";
+    PIEupdateInfo(infoContent);
+}
+//=============================================================================================
 /**
 
  * Finally the developer should call the function PIEsetAreaOfInterest(tlx, tly, brx, bry).
@@ -350,7 +411,8 @@ var texture;
     PIEsetExperimentTitle("Batmobile");
     PIEsetDeveloperName("Bruce");
     PIEhideControlElement();
-
+    initialiseInfo();
+    initialiseHelp();
     /* initialise help and info content */
 
     /* initialise Scene */
@@ -358,6 +420,7 @@ var texture;
 
     /* initialise Other Variables */
     initialiseOtherVariables();
+
 
 // buttons --------------------------------------------------------------------
 function createLabel(lft,topp,w,h,name) {
@@ -397,7 +460,7 @@ function mouseOut() {
     document.body.appendChild(buttonRight);
 
     //left button
-    buttonLeft = createButton('450px','450px','50px','40px','Fall back');
+    buttonLeft = createButton('450px','450px','50px','40px','Back');
     buttonLeft.style.cssText = 'top:480px;left:270px;width: 72px;height: 72px;line-height: 72px;display: block;position: relative;-moz-border-radius: 50%;-webkit-border-radius: 50%;border-radius: 50%;border: 2px solid #444;text-align: center;display: inline-block;vertical-align: middle;position: absolute;z-index: 10;color: #333;  outline: none;cursor: pointer;';
     buttonLeft.addEventListener("mouseover", mouseOver, false);
     buttonLeft.addEventListener("mouseout", mouseOut, false);
@@ -423,7 +486,7 @@ function mouseOut() {
 
 //texts ----------------------------------------------------------------------
     var para = document.createElement("H2");
-    para.textContent = "4-quadrilateral";
+    para.textContent = "quadrilateral";
     para.style.cssText = 'position:absolute;top:450px;left:410px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 22px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
     document.body.appendChild(para);
    // para.addEventListener("mouseover",hola);
@@ -436,7 +499,7 @@ function mouseOut() {
     //-------
     var para4 = document.createElement("H4");
     para4.textContent = "Exterior Angles";
-    para4.style.cssText = 'position:absolute;top:185px;left:1030px; font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 12px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+    para4.style.cssText = 'position:absolute;top:185px;left:1030px; font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 12px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;color:#880E4F;';
     document.body.appendChild(para4);
 
     //interior angle text
@@ -447,14 +510,25 @@ function mouseOut() {
     //------
     var para3 = document.createElement("H5");
     para3.textContent = "Interior Angles";
-    para3.style.cssText = 'position:absolute;top:105px;left:1030px; font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 12px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+    para3.style.cssText = 'position:absolute;top:105px;left:1030px; font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 12px;padding: 80px 50px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;color:#880E4F;';
     document.body.appendChild(para3);
 
 // Create Shape and add it to scene -------------------------------------------
     myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
         //myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
+        myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
     PIEaddElement(myBall); //2, 1.5, 0.1
 
+// dots ---------------------------------------------------------------------------------
+    var dotGeometry = new THREE.Geometry();
+    for(var i=0;i<countOnMe;i++) {
+        dotGeometry.vertices.push(new THREE.Vector3( vertices[i][0] + 1.2,vertices[i][1] + 1.8, myBallZ));
+    }
+  //  console.table(vertices);
+    var dotMaterial = new THREE.PointsMaterial( { size: 3,  transparent: true,
+  depthWrite: false, sizeAttenuation: false, color:0x000000 } );
+    dot = new THREE.Points( dotGeometry, dotMaterial );
+    PIEaddElement(dot);
 
 
 
@@ -462,15 +536,29 @@ function mouseOut() {
     geometry = new THREE.BoxGeometry( mySceneW * 2, mySceneH * 2, wallThickness );
     material = new THREE.MeshLambertMaterial( {color:0xF9BF3B} );
     myBack = new THREE.Mesh( geometry, material );
-    console.log(myCenterX-0.5, myCenterY, -0.0001);
     myBack.position.set(myCenterX, myCenterY, -0.0001);
     //  myBack.receiveShadow = true;
     myBack.scale.set( 1.3, 1, 1 );
     myBack.name="hola"; //test
     PIEaddElement(myBack);
 
+//interior angles ------------------------------------------------------------------------
+    x = y = 0;
+    var fishShape = new THREE.Shape();
+    console.table(vertices);
+    fishShape.moveTo(0.3536,-0.3536);
+    fishShape.lineTo(0.2536,-0.3536);
+    fishShape.quadraticCurveTo(0.2536,-0.3536 ,0.3536,-0.2536);
+    fishShape.lineTo(0.3536,-0.3536);
+    geometry = new THREE.ShapeGeometry( fishShape );
+    material = new THREE.MeshBasicMaterial( { color: 0xd7608d, overdraw: 0.5 } );
+    var myballoon = new THREE.Mesh( geometry, material );
+    myballoon.position.set( (myBallX-0.8), myBallY+0.3, 0.2);
+    myballoon.scale.set( 1, 1, 1 );
+    PIEaddElement(myballoon);
+
     /* Reset all positions */
-    resetExperiment();
+    //resetExperiment();
     PIEsetAreaOfInterest(mySceneTLX, mySceneTLY, mySceneBRX, mySceneBRY);
 
 
@@ -501,7 +589,7 @@ function resetExperiment()
 {
     /* initialise Other Variables */
     initialiseOtherVariables();
-
+   // loadExperimentElements()
     /* Initialise Ball variables */
     myBallX      = myCenterX;
     myBallY      = myCenterY;
@@ -509,7 +597,15 @@ function resetExperiment()
     myBallAY     = gravityY;
 
     /* Reset Ball position */
-    //console.log(myBallX, myBallY, myBallZ);
+    PIEscene.remove(myBall);
+    PIEscene.remove(dot);
+    myBall = createShapeGeometry(countOnMe, countOnMe,0.5);
+    PIEaddElement(myBall);
+
+    //text underneath
+    var para2 =showMeMagicText("H2",arrayofShapes[countOnMe],"450px","460px");
+    para2.style.cssText = 'position:absolute;top:450px;left:410px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 25px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
+
     myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
     myBack.position.set(myCenterX, myCenterY, -0.0001);
 
