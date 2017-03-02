@@ -33,12 +33,12 @@ var cc = 1;
 var cc2 =1;
 
 var items = [0x03A9F4,0xF44336,0xE91E63,0x9C27B0,0x009688,0x4CAF50,0xD50000,0x2196F3,0x607D8B];
-
 //shape variables
 var countOnMe;
 var circlee;
 var vertices = [];
 var globalScope ={};
+var sideScope = {};
 var scopeOther = {};
 var arrayofShapes = {
 	3:"triangle",
@@ -51,6 +51,21 @@ var arrayofShapes = {
 	10:"decagon",
 	11:"hendecagon",
 	12:"dodecagon"
+};
+var dotNames = {
+    0: "A",
+    1: "B",
+    2: "C",
+    3: "D",
+    4: "E",
+    5: "F",
+    6: "G",
+    7: "H",
+    8: "I",
+    9: "J",
+    10: "K",
+    11: "L",
+    12: "M"
 }
 var dot;
 //figure vars
@@ -68,66 +83,6 @@ var buttonExterior;
 var buttonInterior;
 
 //*************************************************************************************************************
-function handleX(newValue)
-{
-    myBallX = newValue;
-    myBall.position.set(myBallX, myBallY, myBallZ);
-    PIErender();
-}
-
-/*
- * This function handles the Y position slider change
- * <p>
- * Updates the myBall position variable.
- * Effect is felt immediately.
- * <p>
- * @param newValue       New Value of the slider
- */
-function handleY(newValue)
-{
-    myBallY = newValue;
-    myBall.position.set(myBallX, myBallY, myBallZ);
-    PIErender();
-}
-
-/*
- * This function handles the X Velocity slider change
- * <p>
- * Updates the myBall velocity variable.
- * Effect is felt from the next animation frame.
- * <p>
- * @param newValue       New Value of the slider
- */
-function handleVX(newValue)
-{
-    myBallVX = newValue;
-}
-
-/*
- * This function handles the Y Velocity slider change
- * <p>
- * Updates the myBall velocity variable.
- * Effect is felt from the next animation frame.
- * <p>
- * @param newValue       New Value of the slider
- */
-function handleVY(newValue)
-{
-    myBallVY = newValue;
-}
-
-/*
- * This function handles the Y acceleration (gravity) slider change
- * <p>
- * Updates the myBall acceleration variable.
- * Effect is felt from the next animation frame.
- * <p>
- * @param newValue       New Value of the slider
- */
-function handleAY(newValue)
-{
-    myBallAY = newValue;
-}
 
 function initialiseControlVariables()
 {
@@ -213,6 +168,7 @@ function initialiseOtherVariables()
 }
 
 // *******************************************************************************************************************
+
 function animate() {
 	requestAnimationFrame( animate );
 	drawCount = ( drawCount + 1 ) % MAX_POINTS;
@@ -283,6 +239,9 @@ function removeEntity(object) {
 }
 
 function showMeMagicRight() {
+PIEchangeDisplayCheckbox('Exterior Angles', false);
+PIEchangeDisplayCheckbox('Interior Angles', false);
+PIEchangeDisplayCheckbox('Diagonals', false);
 	if(toggle3) {
 		toggle3=false;
 		for(var j=0;j<countOnMe;j++) {
@@ -311,12 +270,24 @@ function showMeMagicRight() {
 			removeEntity(globalScope["line"+i]);
 		}
 	}
+
+    //remove border
+    for(var i=0;i<countOnMe;i++) {
+        sideScope["edge"+i].scale.set(0,0,0);
+        var elem = document.getElementById("tex"+i);
+        elem.parentNode.removeChild(elem);
+    }
 	//this.style.border = 0;
 	//change text
 	PIEscene.remove(myBall);
-	if(countOnMe<12) 
-		countOnMe+=1;
+    var newSide =Math.floor(Math.random()*(10)+3);
+	if(newSide == countOnMe) 
+		countOnMe = Math.floor(Math.random()*(10)+3);
+    else 
+        countOnMe = newSide;
+
 	PIEscene.remove(dot);
+
 	var para2 =showMeMagicText("H6",arrayofShapes[countOnMe],"450px","460px");
 	para2.style.cssText = 'position:absolute;top:490px;left:600px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 25px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
 	PIErender();
@@ -324,6 +295,7 @@ function showMeMagicRight() {
     myBall.position.set(myBallX, myBallY+0.2, myBallZ);
    // myBall.scale.set(1.3,1.3,1.3);
 	PIEaddElement(myBall);
+
 	//add points
 	var dotGeometry = new THREE.Geometry();
 	for(var i=0;i<countOnMe;i++) {
@@ -334,10 +306,56 @@ function showMeMagicRight() {
 	dot = new THREE.Points( dotGeometry, dotMaterial );
 	PIEaddElement(dot);
 
+    vertices = vertices.concat(vertices);
+    PIEaddButton("hey");    
+
+
+//adding names
+    vertices = vertices.concat(vertices);
+    for(var i=0;i<countOnMe;i++) {
+        var text2 = document.createElement('div');
+        text2.style.position = 'absolute';
+        //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+        text2.style.width = 200;
+        text2.style.height = 200;
+        text2.style.fontWeight  =700;
+        text2.style.fontSize= 700;
+        text2.style.fontFamily = "Impact,Charcoal,sans-serif" ;
+       // text2.style.backgroundColor = "blue";
+        text2.innerHTML = dotNames[i];
+        console.log(vertices);
+        text2.style.top = -vertices[i][1]*260- vertices[i][1]*5 +320+'px';// vertices[i][1]+ (i*200)
+        text2.style.left =  -vertices[i][0]*260+vertices[i][1]*5+ 680 +'px';//vertices[i][0]+ (i*200)
+        text2.id = "tex"+i;
+        document.body.appendChild(text2);
+    }
+
+    //add sides
+    var p;
+    var watch=0;
+    for(p=0;p<countOnMe;p++) {
+        var geometry = new THREE.Geometry();
+        geometry.vertices.push(
+            new THREE.Vector3( vertices[p][0], vertices[p][1], 0 ),
+            new THREE.Vector3( vertices[p+1][0], vertices[p+1][1], 0 ),
+            new THREE.Vector3( vertices[p+1][0], vertices[p+1][1], 0 )
+        );
+        var material =  new THREE.LineBasicMaterial({color: 0x000000, linewidth: 2.9});
+        sideScope["edge"+watch] = new THREE.Line( geometry, material );
+        sideScope["edge"+watch].position.set(myBallX, myBallY+0.2, 0.1);
+        sideScope["edge"+watch].name = "edge"+watch;
+        PIEaddElement(sideScope["edge"+watch]);
+        sideScope["edge"+watch].receiveShadow=false;sideScope["edge"+watch].castShadow=false;
+        watch+=1;
+    }
+
 	PIErender();
 }
 
 function showMeMagicLeft() {
+    PIEchangeDisplayCheckbox('Exterior Angles', false);
+    PIEchangeDisplayCheckbox('Interior Angles', false);
+    PIEchangeDisplayCheckbox('Diagonals', false);
     if(toggle3) {
         toggle3=false;
         for(var j=0;j<countOnMe;j++) {
@@ -383,7 +401,7 @@ function showMeMagicLeft() {
     for(var i=0;i<countOnMe;i++) {
         dotGeometry.vertices.push(new THREE.Vector3( vertices[i][0] + 2.0,vertices[i][1] + 1.7, myBallZ));
     }
-    var dotMaterial = new THREE.PointsMaterial( { size: 3,  transparent: true,
+    var dotMaterial = new THREE.PointsMaterial( { size: 14,  transparent: true,
         depthWrite: false, sizeAttenuation: false, color:0x000000 } );
     dot = new THREE.Points( dotGeometry, dotMaterial );
     PIEaddElement(dot);
@@ -391,34 +409,55 @@ function showMeMagicLeft() {
     PIErender();
 }
 
+    function addStep() {
+
+        vertices = geometry.vertices;
+        var last = vertices[ vertices.length - 1 ];
+        vertices.push( 
+
+            new THREE.Vector3( 
+            last.x + ( 2 * Math.random() - 1 ) * step,
+            last.y + ( 2 * Math.random() - 1 ) * step, 
+            last.z + ( 2 * Math.random() - 1 ) * step ) 
+
+        );
+
+        var geometry = new THREE.Geometry();
+        geometry.vertices = vertices;
+
+        //scene.remove( line );
+        var linee = new THREE.Line( geometry, material )
+        PIEaddElement( linee );
+
+    }
+
+function animate() {
+    PIEanimate(animate);
+}
+
 function showMeMagicDiagonal() {
 	if(toggle) {
 		toggle= false;
-		vertices = vertices.concat(vertices);
+		vertices = [];
 		// console.table(vertices);
-		var i,j,k;
+		var i,j,k,p;
 		globalScope ={};
 		var watch=0;
 		//drawing diagonals     
-		for(i=0;i<countOnMe;i++) {
-			k = i+2;
-			for(j=k;j<(k+(countOnMe-3));j++) {
-				var geometry = new THREE.Geometry();
-				geometry.vertices.push(
-						new THREE.Vector3( vertices[i][0], vertices[i][1], 0 ),
-						new THREE.Vector3( vertices[j][0], vertices[j][1], 0 ),
-						new THREE.Vector3( vertices[j][0], vertices[j][1], 0 )
-						);
-				var material = new THREE.LineBasicMaterial({color: 0x0000ff});
-				globalScope["line"+watch] = new THREE.Line( geometry, material );
-				globalScope["line"+watch].position.set(myBallX, myBallY+0.2, 0.1);
-				globalScope["line"+watch].name = "line"+watch;
-				PIEaddElement(globalScope["line"+watch]);
-				watch+=1;
-			}
-		}
-		console.table(globalScope);
+		//for(i=0;i<countOnMe;i++) {
+		//	k = i+2;
+		//	for(j=k;j<(k+(countOnMe-3));j++) {
+        var material = new THREE.LineBasicMaterial({ color: 0x0077ff }); 
+        var geometry = new THREE.Geometry();
+        geometry.vertices.push( new THREE.Vector3( 1, 1, 0.1) );
+        var linee = new THREE.Line( geometry, material ) 
+        PIEaddElement( linee);
+
+      setInterval( addStep, 500 );
+			//}
+		//}
 		PIErender();
+                animate();
 	}
 	else {
 		toggle = true;
@@ -480,7 +519,6 @@ function showMeMagicInterior() {
 		cc=cc+1;
 		//if(cc%2==0) {
 			scopeOther ={};
-			console.error(cc);
 			var rad = angle*Math.PI/180;
 			//circle
 			var fact1 = 1/2;
@@ -495,7 +533,6 @@ function showMeMagicInterior() {
 				scopeOther["circle"+i].position.set(myBallX+vertices[i][0], (myBallY+0.2)+vertices[i][1], 0.1)
 					PIEaddElement(scopeOther["circle"+i]);
 		//	}
-			console.table(scopeOther);                    
 		}
 		PIErender();
 
@@ -535,9 +572,9 @@ function initialiseControls()
 {
     initialiseControlVariables();
     /* Create Input Panel */
-    PIEaddInputCommand('Exterior Angles', showMeMagicExterior);
-    PIEaddInputCommand('Interior Angles', showMeMagicInterior);
-    PIEaddInputCommand('Show Diagonals', showMeMagicDiagonal);
+    PIEaddDualCheckbox('Exterior Angles', false,showMeMagicExterior);
+    PIEaddDualCheckbox('Interior Angles', false,showMeMagicInterior);
+    PIEaddDualCheckbox('Show Diagonals', false,showMeMagicDiagonal);
     PIEaddInputCommand('Go on',showMeMagicRight);
     PIEaddInputCommand('Back',showMeMagicLeft);
 }
@@ -587,8 +624,8 @@ function loadExperimentElements()
 	var loader;
 	var texture;
 
-	PIEsetExperimentTitle("Regular polygons");
-	PIEsetDeveloperName("Anurag");
+	PIEsetExperimentTitle("Batmobile");
+	PIEsetDeveloperName("Bruce");
 	PIEhideControlElement();
 	initialiseInfo();
 	initialiseHelp();
@@ -664,9 +701,10 @@ function loadExperimentElements()
 
 	// Create Shape and add it to scene -------------------------------------------
 	myBall = createShapeGeometry(countOnMe, countOnMe,0.7);
-	//myBall.position.set(myBallX-0.8, myBallY+0.3, myBallZ);
 	myBall.position.set(myBallX, myBallY+0.2, myBallZ);
-	PIEaddElement(myBall); //2, 1.5, 0.1
+    myBall.receiveShadow = false;
+    myBall.castShadow = false;
+    	PIEaddElement(myBall); //2, 1.5, 0.1
 
 	// dots ---------------------------------------------------------------------------------
 	var dotGeometry = new THREE.Geometry();
@@ -679,18 +717,54 @@ function loadExperimentElements()
 	dot = new THREE.Points( dotGeometry, dotMaterial );
 	PIEaddElement(dot);
 
+//adding names
+     vertices = vertices.concat(vertices);
+    for(var i=countOnMe-1;i>=0;i--) {
+        var text2 = document.createElement('div');
+        text2.style.position = 'absolute';
+        //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+        text2.style.width = 200;
+        text2.style.height = 200;
+       // text2.style.backgroundColor = "blue";
+        text2.innerHTML = "A";
+        console.log("tex"+i,i);
+        text2.style.top = vertices[i][1]*250+ 325+countOnMe*10+'px';// vertices[i][1]+ (i*200)
+        text2.style.left =  vertices[i][0]*250+ 680 +'px';//vertices[i][0]+ (i*200)
+        text2.id = "tex"+i;
+        document.body.appendChild(text2);
+    }
 
+
+//drawing sides border---------------------------------------------------------------------------------------
+    var p;
+    var watch=0;
+    for(p=0;p<countOnMe;p++) {
+        var geometry = new THREE.Geometry();
+        geometry.vertices.push(
+            new THREE.Vector3( vertices[p][0], vertices[p][1], 0 ),
+            new THREE.Vector3( vertices[p+1][0], vertices[p+1][1], 0 ),
+            new THREE.Vector3( vertices[p+1][0], vertices[p+1][1], 0 )
+        );
+        var material =  new THREE.LineBasicMaterial({color: 0x000000, linewidth: 2.5});
+        sideScope["edge"+watch] = new THREE.Line( geometry, material );
+        sideScope["edge"+watch].position.set(myBallX, myBallY+0.2, 0.1);
+        sideScope["edge"+watch].name = "edge"+watch;
+        PIEaddElement(sideScope["edge"+watch]);
+        sideScope["edge"+watch].receiveShadow=false;sideScope["edge"+watch].castShadow=false;
+        watch+=1;
+    }
+        console.table(sideScope);
 
 	//my back ------------------------------------------------------------------------------
 	geometry = new THREE.BoxGeometry( mySceneW * 2, mySceneH * 2, wallThickness );
 	material = new THREE.MeshLambertMaterial( {color:0xF9BF3B} );
 	myBack = new THREE.Mesh( geometry, material );
 	myBack.position.set(myCenterX, myCenterY, -0.0001);
-	//  myBack.receiveShadow = true;
-	myBack.scale.set( 1.3, 1, 1 );
+	myBack.scale.set( 1.3, 1, 1);
 	myBack.name="hola"; //test
 	PIEaddElement(myBack);
-
+    myBack.receiveShadow = false;
+    myBack.castShadow = false;
 
 	/* Reset all positions */
 	//resetExperiment();
@@ -725,6 +799,9 @@ function loadExperimentElements()
 
 function resetExperiment()
 {
+PIEchangeDisplayCheckbox('Diagonals', false);
+PIEchangeDisplayCheckbox('Exterior Angles', false);
+PIEchangeDisplayCheckbox('Interior Angles', false);
     //angles
     if(toggle3) {
         toggle3=false;
