@@ -23,27 +23,26 @@ var backB=-4.0;         /* Back Barrier */
 var wallThickness;      /* Wall Thickness */
 
 /* Room Objects */
+var myVessel1;
+var myVessel2;
+var myVessel3;
 var myFloor;            /* Floor */
-var myVessel;          /* Ceiling */
-var myLevel1;             /* Back */
-var myLevel2;            /* Right */
-var mybase1;
-var mybase2;
-var myWeight1;
-var myWeight2;             /* Left */
+var myCeiling;          /* Ceiling */
+var myBack;             /* Back */
+var myRight;            /* Right */
+var myLeft;             /* Left */
 
 /* Ball variables */
+var wHeight;
 var myBall;             /* Ball Object */
 var myBallRadius;       /* Radius */
-var weight1;            /* X Position */
-var weight2;            /* Y Position */
+var myBallX;            /* X Position */
+var myBallY;            /* Y Position */
 var myBallVX;           /* X Velocity */
 var myBallVY;           /* Y Velocity */
 var myBallAX;           /* X Acceleration */
 var myBallAY;           /* Y Acceleration */
-var myBallZ;  
-var level1h;
-var level2h;          /* Z Position for placing ball */
+var myBallZ;            /* Z Position for placing ball */
 
 /* Parameters, Variables */
 var gravityX;           /* X component of Gravity in m/S2 */
@@ -62,15 +61,15 @@ var gravityY;           /* Y component of Gravity in m/S2 */
  */
 function myBallDrag(element, newpos)
 {
-    weight1 = newpos.x;
-    if (newpos.x < (leftB + myBallRadius)) { weight1 = (leftB + myBallRadius) }
-    else if (newpos.x > (rightB - myBallRadius)) { weight1 = (rightB - myBallRadius) }
-    weight2 = newpos.y;
-    if (newpos.y < (bottomB + myBallRadius)) { weight2 = (bottomB + myBallRadius); }
-    else if (newpos.y > (topB - myBallRadius)) { weight2 = (topB  - myBallRadius); }
+    myBallX = newpos.x;
+    if (newpos.x < (leftB + myBallRadius)) { myBallX = (leftB + myBallRadius) }
+    else if (newpos.x > (rightB - myBallRadius)) { myBallX = (rightB - myBallRadius) }
+    myBallY = newpos.y;
+    if (newpos.y < (bottomB + myBallRadius)) { myBallY = (bottomB + myBallRadius); }
+    else if (newpos.y > (topB - myBallRadius)) { myBallY = (topB  - myBallRadius); }
     myBallZ = newpos.z;
 
-    myBall.position.set(weight1, weight2, myBallZ);
+    myBall.position.set(myBallX, myBallY, myBallZ);
 }
 
 /******************* End of Interaction functions ***********************/
@@ -112,8 +111,8 @@ var AYstep;         /* Y Acceleration Slider Step */
  */
 function handleX(newValue)
 {
-    weight1 = newValue;
-    console.log(weight1);
+    myBallX = newValue;
+    myBall.position.set(myBallX, myBallY, myBallZ);
     PIErender();
 }
 
@@ -127,35 +126,84 @@ function handleX(newValue)
  */
 function handleY(newValue)
 {
-    weight2 = newValue;
-    console.log(weight2);
+    myBallY = newValue;
+    myBall.position.set(myBallX, myBallY, myBallZ);
     PIErender();
 }
 
+/*
+ * This function handles the X Velocity slider change
+ * <p>
+ * Updates the myBall velocity variable.
+ * Effect is felt from the next animation frame.
+ * <p>
+ * @param newValue       New Value of the slider
+ */
+function handleVX(newValue)
+{
+    myBallVX = newValue;
+}
 
+/*
+ * This function handles the Y Velocity slider change
+ * <p>
+ * Updates the myBall velocity variable.
+ * Effect is felt from the next animation frame.
+ * <p>
+ * @param newValue       New Value of the slider
+ */
+function handleVY(newValue)
+{
+    myBallVY = newValue;
+}
 
+/*
+ * This function handles the Y acceleration (gravity) slider change
+ * <p>
+ * Updates the myBall acceleration variable.
+ * Effect is felt from the next animation frame.
+ * <p>
+ * @param newValue       New Value of the slider
+ */
+function handleAY(newValue)
+{
+    myBallAY = newValue;
+}
 
 function initialiseControlVariables()
 {
     /* Labels */
-    PosX="Weight 1";                  /* X Position Slider Label */
-    PosY="Weight 2";                  /* Y Position Slider Label */
+    PosX="X";                  /* X Position Slider Label */
+    PosY="Y";                  /* Y Position Slider Label */
+    VelX="VX";                 /* X Velocity Slider Label */
+    VelY="VY";                 /* Y Velocity Slider Label */
+    AccY="AY";                 /* Y Acceleration Slider Label */
 
     /* Default (initial) Values */
-    Xdefault=5;        /* X Position Slider Default Value */
-    Ydefault=5;        /* Y Position Slider Default Value */
-
+    Xdefault=myCenterX;        /* X Position Slider Default Value */
+    Ydefault=myCenterY;        /* Y Position Slider Default Value */
+    VXdefault=0.1;             /* X Velocity Slider Default Value */
+    VYdefault=0.1;             /* Y Velocity Slider Default Value */
+    AYdefault=-9.8;            /* Y Acceleration Slider Default Value */
 
     /* Slider Limits */
-    Xmin=1;   /* X Position Slider Minimum Value */
-    Xmax=10;  /* X Position Slider Maximum Value */
-    Ymin=1; /* Y Position Slider Minimum Value */
-    Ymax=10;    /* Y Position Slider Maximum Value */
-
+    Xmin=leftB+myBallRadius;   /* X Position Slider Minimum Value */
+    Xmax=rightB-myBallRadius;  /* X Position Slider Maximum Value */
+    Ymin=bottomB+myBallRadius; /* Y Position Slider Minimum Value */
+    Ymax=topB-myBallRadius;    /* Y Position Slider Maximum Value */
+    VXmin=-1.0;                /* X Velocity Slider Minimum Value */
+    VXmax= 1.0;                /* X Velocity Slider Maximum Value */
+    VYmin=-1.0;                /* Y Velocity Slider Minimum Value */
+    VYmax= 1.0;                /* Y Velocity Slider Maximum Value */
+    AYmin=-15.0;               /* Y Acceleration Slider Maximum Value */
+    AYmax= 0.0;                /* Y Acceleration Slider Minimum Value */
 
     /* Slider Steps */
-    Xstep=1;                 /* X Position Slider Step */
-    Ystep=1;                  /* Y Position Slider Step */
+    Xstep=0.1;                 /* X Position Slider Step */
+    Ystep=0.1;                  /* Y Position Slider Step */
+    VXstep=0.1;                 /* X Velocity Slider Step */
+    VYstep=0.1;                 /* Y Velocity Slider Step */
+    AYstep=-0.1;               /* Y Acceleration Slider Step */
 }
 
 
@@ -165,10 +213,12 @@ function initialiseControls()
     /* Create Input Panel */
     PIEaddInputSlider(PosX, Xdefault, handleX, Xmin, Xmax, Xstep);
     PIEaddInputSlider(PosY, Ydefault, handleY, Ymin, Ymax, Ystep);
+    PIEaddInputSlider(VelX, VXdefault, handleVX, VXmin, VXmax, VXstep);
+
     /* Create Display Panel */
     PIEaddDisplayText(PosX, Xdefault);
     PIEaddDisplayText(PosY, Ydefault);
-
+    PIEaddDisplayText(VelX, VXdefault);
 }
 
 
@@ -180,7 +230,6 @@ var helpContent;
 function initialiseHelp()
 {
     helpContent="";
-  
     helpContent = helpContent + "<h2>Happy Experimenting</h2>";
     PIEupdateHelp(helpContent);
 }
@@ -196,6 +245,7 @@ function initialiseInfo()
 function initialiseScene()
 {
     /* Initialise Scene Variables */
+    wHeight = 1.9;
     mySceneTLX = 0.0;
     mySceneTLY = 3.0;
     mySceneBRX = 4.0;
@@ -224,17 +274,28 @@ function initialiseOtherVariables()
     topB=mySceneTLY;
 }
 
+/**
 
+ * Finally the developer should call the function PIEsetAreaOfInterest(tlx, tly, brx, bry).
+ * The parameters are the top left corner and bottom right corner coordinates.
+ * The X axis goes from lef to right of te display and the y axis goes from bottom to up.
+ * The area of interst should be wide and tall enough to cover all potential movements.
+ * <p>
+ * The developer should have a fairly good idea of the controls forthe experiment.
+ * Once the scene is setup and is visible, the developer can include the controls and
+ * the callback functions needed to update the experiment parameters.
+ * The PIE library provides a set of functions to implement common controls.
+ * <p>
+ */
 function loadExperimentElements()
 {
 var geometry;
 var material;
 var loader;
 var texture;
-var rectShape;
 
     PIEsetExperimentTitle("Experiment Name");
-    PIEsetDeveloperName("Wayne");
+    PIEsetDeveloperName("Avinash Awate");
     PIEhideControlElement();
 
     /* initialise help and info content */
@@ -247,140 +308,66 @@ var rectShape;
     /* initialise Other Variables */
     initialiseOtherVariables();
 
-//texts
-    var para = document.createElement("H5");
-    para.textContent = "Pressure";
-    para.style.cssText = 'position:absolute;top:90px;left:80px;font-family: "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;font-size: 25px;padding: 10px -80px;text-align: center;text-transform: uppercase;text-rendering: optimizeLegibility;';
-    document.body.appendChild(para);
-
-//myWeight1
-    var diff =0.1;
-    rectShape = new THREE.Shape();
-    rectShape.moveTo( 1-diff,1.6 );
-    rectShape.lineTo( 1-diff,1.8+diff );
-    rectShape.lineTo( 1.3+diff,1.8+diff );
-    rectShape.lineTo( 1.3+diff,1.6 );
-    rectShape.lineTo( 1-diff,1.6 );
-    geometry = new THREE.ShapeGeometry( rectShape );
-    material = new THREE.MeshBasicMaterial( { color: 0x9C27B0 } );
-    myWeight1 = new THREE.Mesh( geometry, material );
-    myWeight1.scale.set(1,1,1);
-    PIEaddElement(myWeight1);
-
-
-    level1h=1.5-diff;
-    level2h=1.3;
-//myVessel
+//myVessel1
     material = new THREE.LineBasicMaterial({    color: 0x000000,
         linewidth: 4,
-        linecap: 'round', //ignored by WebGLRenderer
-        linejoin:  'round' //ignored by WebGLRenderer
     });
     geometry = new THREE.Geometry();
     geometry.vertices.push(
-            new THREE.Vector3( 1, level1h, 0),
-            new THREE.Vector3( 1, 0.7, 0 ),
-            new THREE.Vector3( 3, 0.7, 0 ),
-            new THREE.Vector3( 3, level2h, 0 ),
-            new THREE.Vector3( 2.6, level2h, 0),
-            new THREE.Vector3( 2.6, 1.0, 0),
-            new THREE.Vector3( 1.3, 1.0, 0 ),
-            new THREE.Vector3( 1.3, level1h, 0 ),
-            new THREE.Vector3( 1, level1h, 0 )
+            new THREE.Vector3( 1.2, wHeight, 0),
+            new THREE.Vector3( 1.2, 1, 0),
+            new THREE.Vector3( 2.3, 1, 0),
+            new THREE.Vector3( 2.3, wHeight, 0)
             );
-    myVessel = new THREE.Line(geometry, material);
-    myVessel.scale.set( 1, 1, 1 );
-    PIEaddElement(myVessel);
+    myVessel1 = new THREE.Line(geometry, material);
+    PIEaddElement(myVessel1);
 
+//myVessel2
+    material = new THREE.LineBasicMaterial({    color: 0x000000,
+        linewidth: 4,
+    });
+    geometry = new THREE.Geometry();
+    geometry.vertices.push(
+            new THREE.Vector3( 1.2, wHeight+0.02, 0),
+            new THREE.Vector3( 1.2, 2, 0)
+            );
+    myVessel2 = new THREE.Line(geometry, material);
+    PIEaddElement(myVessel2);
 
-//myLevel1
-    rectShape = new THREE.Shape();
-    rectShape.moveTo( 1,level1h );
-    rectShape.lineTo( 1, 0.7 );
-    rectShape.lineTo( 2, 0.7 );
-    rectShape.lineTo( 2, 1.0 );
-    rectShape.lineTo( 1.3, 1.0 );
-    rectShape.lineTo( 1.3, level1h );
-    rectShape.lineTo( 1, level1h );
-    geometry = new THREE.ShapeGeometry( rectShape );
-    material = new THREE.MeshBasicMaterial( { color: 0x03A9F4 } );
-    myLevel1 = new THREE.Mesh( geometry, material );
-    myLevel1.scale.set(1,1,1);
-    PIEaddElement(myLevel1);
+//myVessel3
+    material = new THREE.LineBasicMaterial({    color: 0x000000,
+        linewidth: 4,
+    });
+    geometry = new THREE.Geometry();
+    geometry.vertices.push(
+            new THREE.Vector3( 2.3, wHeight+0.02 , 0),
+            new THREE.Vector3( 2.3, 2, 0)
+            );
+    myVessel3 = new THREE.Line(geometry, material);
+    PIEaddElement(myVessel3);
 
-//myLevel2
-    rectShape = new THREE.Shape();
-    rectShape.moveTo( 3,level2h );
-    rectShape.lineTo( 3, 0.7 );
-    rectShape.lineTo( 2, 0.7 );
-    rectShape.lineTo( 2, 1.0 );
-    rectShape.lineTo( 2.6, 1.0 );
-    rectShape.lineTo( 2.6, level2h );
-    rectShape.lineTo( 3, level2h );
-    geometry = new THREE.ShapeGeometry( rectShape );
-    material = new THREE.MeshBasicMaterial( { color: 0x03A9F4 } );
-    myLevel2 = new THREE.Mesh( geometry, material );
-    myLevel2.scale.set(1,1,1);
-    PIEaddElement(myLevel2);
+    /* Initialise Wall variables */
+    /* All walls extend beynd the room size in both directions */
+    /* Floor */
 
-//mybase1
-    rectShape = new THREE.Shape();
-    rectShape.moveTo( 1.3,1.8 );
-    rectShape.lineTo( 1.3,1.7 );
-    rectShape.lineTo( 1.2,1.7 );
-    rectShape.lineTo( 1.2,1.6 );
-    rectShape.lineTo( 1.3,1.6 );
-    rectShape.lineTo( 1.3, 1.5 );
-    rectShape.lineTo( 1, 1.5 );
-    rectShape.lineTo( 1, 1.6 );
-    rectShape.lineTo( 1.1, 1.6 );
-    rectShape.lineTo( 1.1, 1.7 );
-    rectShape.lineTo( 1, 1.7 );
-    rectShape.lineTo( 1, 1.8 );
-    rectShape.lineTo( 1.3,1.8 );
-    geometry = new THREE.ShapeGeometry( rectShape );
-    material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
-    mybase1 = new THREE.Mesh( geometry, material );
-    mybase1.scale.set(1,0.9 ,1);
-    PIEaddElement(mybase1);
-
-//mybase2
-    rectShape = new THREE.Shape();
-    rectShape.moveTo( 3,1.8 );
-    rectShape.lineTo( 3,1.7 );
-    rectShape.lineTo( 2.9,1.7 );
-    rectShape.lineTo( 2.9,1.6 );
-    rectShape.lineTo( 3,1.6 );
-    rectShape.lineTo( 3, 1.5 );
-    rectShape.lineTo( 2.6, 1.5 );
-    rectShape.lineTo( 2.6, 1.6 );
-    rectShape.lineTo( 2.7, 1.6 );
-    rectShape.lineTo( 2.7, 1.7 );
-    rectShape.lineTo( 2.6, 1.7 );
-    rectShape.lineTo( 2.6, 1.8 );
-    rectShape.lineTo( 3,1.8 );
-    geometry = new THREE.ShapeGeometry( rectShape );
-    material = new THREE.MeshBasicMaterial( { color: 0x000000 } );
-    mybase2 = new THREE.Mesh( geometry, material );
-    mybase2.scale.set(1,1,1);
-    PIEaddElement(mybase2);
-
-
-
-
+    geometry = new THREE.BoxGeometry( mySceneW * 2, wallThickness, 100);
+    material = new THREE.MeshLambertMaterial( {color: 0xaaaaaa} );
+    myFloor  = new THREE.Mesh( geometry, material );
+    // myFloor.lookAt(new THREE.Vector3(0,1,0));
+    myFloor.position.set(myCenterX, bottomB, 0.0);
+    myFloor.scale.set( 1.3, 1.4, 1.4);
+    PIEaddElement(myFloor);
 
     /* Back */
     // material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x111111, map: texture } );
     // geometry = new THREE.PlaneBufferGeometry( mySceneW * 2, mySceneH * 2 );
     geometry = new THREE.BoxGeometry( mySceneW * 2, mySceneH * 2, wallThickness );
-    material = new THREE.MeshLambertMaterial( {color: 0xffffff} );
+    material = new THREE.MeshLambertMaterial( {color: 0xF9BF3B} );
     myBack = new THREE.Mesh( geometry, material );
     myBack.position.set(myCenterX, myCenterY, backB - (wallThickness / 2));
-    myBack.scale.set(1.3,1,1);
-    myBack.receiveShadow = true;
+    myBack.scale.set( 1.3, 1, 1);
     PIEaddElement(myBack);
     myBack.receiveShadow = false;
-    myBack.castShadow = false;
 
     /* Instantiate experiment controls */
     initialiseControls();
@@ -408,15 +395,20 @@ function resetExperiment()
 {
     /* initialise Other Variables */
     initialiseOtherVariables();
+    /* Reset Wall position */
+    /* Floor */
+    myFloor.position.set(myCenterX, bottomB - (wallThickness / 2), 0.0);
 
-
+    /* Back */
+    myBack.position.set(myCenterX, myCenterY, backB - (wallThickness / 2));
 }
 
 /******************* End of Reset Experiment code ***********************/
 
 /******************* Update (animation changes) code ***********************/
 
-/*
+/**
+
  * <p>
  * @param  t       The time in milliseconds elapsed since the beginning of animation cycle
  * @param  dt      The time in milliseconds elapsed since the last acll to this function
@@ -433,7 +425,22 @@ var boundaryT;      /* Boundary Event Time */
 var tempT;          /* Temporary time */
 
     /* Load Ball coordinates */
-  
+    myBallX = myBall.position.x;
+    myBallY = myBall.position.y;
+    myBallZ = myBall.position.z;
+
+    /* Intialise for boundary detection */
+    changeX   = 1;
+    changeY   = 1;
+    boundaryT = dt / 1000.0;    /* convert to seconds */
+
+
+    /* Finally Update the Display Panel with new values */
+    PIEchangeDisplayText(PosX, myBallX);
+    PIEchangeDisplayText(PosY, myBallY);
+    PIEchangeDisplayText(VelX, myBallVX);
+    PIEchangeDisplayText(VelY, myBallVY);
+    PIEchangeDisplayText(AccY, myBallAY);
 }
 
 /******************* Update (animation changes) code ***********************/
