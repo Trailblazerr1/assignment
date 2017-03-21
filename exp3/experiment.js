@@ -26,6 +26,7 @@ var wallThickness;      /* Wall Thickness */
 var myVessel1;
 var myVessel2;
 var myVessel3;
+var myFlow1;
 var myFloor;            /* Floor */
 var myCeiling;          /* Ceiling */
 var myBack;             /* Back */
@@ -346,6 +347,31 @@ var texture;
     myVessel3 = new THREE.Line(geometry, material);
     PIEaddElement(myVessel3);
 
+//myFlow1
+var numPoints = 100;
+
+spline = new THREE.SplineCurve3([
+   new THREE.Vector3(0, 0, 0),
+   new THREE.Vector3(0, 2.00, 0),
+   new THREE.Vector3(1.50, 1.50, 0),
+   new THREE.Vector3(1.50, 0.50, 0),
+   new THREE.Vector3(2.50, 1.00, 0),
+   new THREE.Vector3(2.50, 3.00, 0)
+]);
+
+var material = new THREE.LineBasicMaterial({
+    color: 0xff00f0,
+});
+
+var geometry = new THREE.Geometry();
+var splinePoints = spline.getPoints(numPoints);
+
+for(var i = 0; i < splinePoints.length; i++){
+    geometry.vertices.push(splinePoints[i]);  
+}
+
+var line = new THREE.Line(geometry, material);
+PIEaddElement(line);
     /* Initialise Wall variables */
     /* All walls extend beynd the room size in both directions */
     /* Floor */
